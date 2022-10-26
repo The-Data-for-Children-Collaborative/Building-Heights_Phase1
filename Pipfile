@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+earthengine-api = "*"
+ipykernel = "*"
+matplotlib = "*"
+ipython = "*"
+nbstripout = "*"
+mkdocs="*"
+pytest="*"
+cookiecutter="*"
+mkdocs-cinder="*"
+
+[requires]
+python_version = "3.8"
