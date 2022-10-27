@@ -9,10 +9,21 @@ import numpy as np
 import IPython.display as disp
 import pandas as pd
 import utm
+import rioxarray
+import urllib.request
+
+
+### user defined inputs ###
+image_collection = "COPERNICUS/S2_SR"
+start_date = "2020-08-01"
+end_date = "2020-08-31"
+bands = ["B2", "B3", "B4"]
+image_bounds = [0, 3000]
+
 
 # authenticate and initialize gee
 # ee.Authenticate()
-# ee.Initialize()
+ee.Initialize()
 
 
 def load_ref_coords(path, filename):
@@ -22,9 +33,33 @@ def load_ref_coords(path, filename):
     return df_coords
 
 
+def save_sentinel_image(
+    filename, image_collection, date_initial, date_final, image_bounds, bands
+):
+
+    # first retrieve the co-ordinates
+    coords = get_coords_from_tif(filename)
+
+    # strip the relevant info from filename
+    filecode = filename[-12:-4]
+    sentinel_filename = "stl2_" + filecode + "_.png"
+
+    # get the fdb image
+    fdb_img = get_fdb_image(image_collection, coords, date_initial, date_final)
+
+    # select the bands and scale
+    url = fdb_img.select(bands).getThumbURL({"min": 0, "max": 3000})
+
+    # save the image
+    urllib.request.urlretrieve(url, sentinel_filename)
+
+    return
+
+
 def get_fdb_image(image_collection, coords, date_initial, date_final):
     """Get an fdb image from a set of co-ordinates."""
     aoi = ee.Geometry.Polygon(coords)
+    print(aoi)
     ffa_db = ee.Image(
         ee.ImageCollection(image_collection)
         .filterBounds(aoi)
@@ -36,44 +71,46 @@ def get_fdb_image(image_collection, coords, date_initial, date_final):
     return ffa_db
 
 
-def select_coords_from_df(df_coords, i):
-    """Returns a set of lat/long co-ordinates from i-th line of dataframe."""
-    coord_row = df_coords.iloc[[i]]
+def get_coords_from_tif(filename):
+    """Returns a set of lat/long co-ordinates from tif file."""
 
-    # retrive the co-ordinates
-    # x0 = np.abs(coord_row.left.values[0])
-    # x1 = np.abs(coord_row.right.values[0])
-    # y0 = np.abs(coord_row.bottom.values[0])
-    # y1 = np.abs(coord_row.top.values[0])
+    # load in the array
+    array = rioxarray.open_rasterio(filename, masked=True).squeeze()
 
-    # change - to _ in filename to match with maxar data
-    filename = "_".join(coord_row.qmdt_cod.values[0].split("-"))
+    # get the bounding co-ordinates
+    x0 = float(array.x[0])
+    y0 = float(array.y[0])
+    x1 = float(array.x[-1])
+    y1 = float(array.y[-1])
 
-    # set up square corners and convert to latlong (for gee)
-    # print(x0, y0)
-    (x0, y0) = (334397.081, 7393629.949)
+    # set up the corners of the image square
     bl = utm.to_latlon(x0, y0, 23, "K")
-    print(bl)
-    # br = utm.to_latlon(x1, y0, 23, "K")
-    # tr = utm.to_latlon(x1, y1, 23, "K")
-    # tl = utm.to_latlon(x0, y1, 23, "K")
+    br = utm.to_latlon(x1, y0, 23, "K")
+    tr = utm.to_latlon(x1, y1, 23, "K")
+    tl = utm.to_latlon(x0, y1, 23, "K")
+
+    print(bl, br, tr, tl)
 
     # make a list of the lat-long pairs
     coord_list = []
     for coord in [bl, br, tr, tl]:
-        coord_list.append(list(coord))
-
-    output_dict = {"filename": filename, "coords": coord_list}
-
-    return output_dict
+        coord_list.append(list(coord)[::-1])
+    return coord_list
 
 
 if __name__ == "__main__":
-    df_coords = load_ref_coords(
-        "/home/callow46/Autumn22_DFCCU/data/processed/", "grids_extent.csv"
-    )
-    print(df_coords.head())
-    print(df_coords.info())
+    # df_coords = load_ref_coords(
+    #     "/home/callow46/Autumn22_DFCCU/data/processed/", "grids_extent.csv"
+    # )
+    # print(df_coords.head())
+    # print(df_coords.info())
 
-    coord_0 = select_coords_from_df(df_coords, 0)
-    print(coord_0)
+    coord_0 = get_coords_from_tif(
+        "/home/callow46/Autumn22_DFCCU/data/raw/test_data/BHM-2222-224.tif"
+    )
+
+    filename = "/home/callow46/Autumn22_DFCCU/data/raw/test_data/BHM-2222-224.tif"
+
+    save_sentinel_image(
+        filename, image_collection, start_date, end_date, image_bounds, bands
+    )
