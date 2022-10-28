@@ -50,6 +50,6 @@ hm_BH_df=pd.DataFrame({'file_name':file_name_list,
                        'pixel_vert':pixel_y_list})
 
 print('dataframe created')
-filepath="/home/dana/height_model_file_edges.csv"
+filepath="/home/dana/data/height_model_file_edges.csv"
 hm_BH_df.to_csv(filepath,index=False)
 print('data written to csv file, done!')
