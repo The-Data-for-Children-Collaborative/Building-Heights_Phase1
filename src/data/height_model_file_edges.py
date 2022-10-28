@@ -6,10 +6,23 @@ import numpy as np
 import glob
 import rioxarray as rxr
 import pandas as pd
+import os.path
+import sys
+
+# username
+try:
+    username = sys.argv[1]
+except IndexError:
+    sys.exit("Please enter username as command line arg")
 
 #list height-model BH(building height) files, adaptet from list_BHM_files.py
 # path to data
-datapath = "/home/dana/data/UNICEF_data/height-model/"
+datapath = "/home/"+username+"/data/UNICEF_data/height-model/"
+
+# check if the csv file exists
+output_file = "/home/" + username + "/data/height_model_file_edges.csv"
+if os.path.isfile(output_file):
+    sys.exit("Please delete the exisiting csv file if you want to extract the data again")
 
 # search through BHM folders and add them to list
 folder_search = glob.glob(datapath + "????-BHM")
@@ -50,6 +63,6 @@ hm_BH_df=pd.DataFrame({'file_name':file_name_list,
                        'pixel_vert':pixel_y_list})
 
 print('dataframe created')
-filepath="/home/dana/data/height_model_file_edges.csv"
+filepath="/home/tim/data/height_model_file_edges.csv"
 hm_BH_df.to_csv(filepath,index=False)
 print('data written to csv file, done!')
