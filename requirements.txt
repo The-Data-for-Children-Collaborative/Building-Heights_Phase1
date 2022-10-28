@@ -1,4 +1,7 @@
 mkdocs
-mkdocs-cinder
+mkdocs - cinder
 cookiecutter
 pytest
+numpy
+rioxarray
+pandas
