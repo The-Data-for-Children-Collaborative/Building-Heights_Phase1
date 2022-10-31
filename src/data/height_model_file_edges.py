@@ -46,7 +46,7 @@ min_value_list=[]
 max_value_list=[]
 pixel_y_list = []
 file_name_list = []
-for file in file_list[:3]:
+for file in file_list:
     file_array = rxr.open_rasterio(file)
     x_min_list.append(np.nanmin(file_array.x))
     x_max_list.append(np.nanmax(file_array.x))
