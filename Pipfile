@@ -14,6 +14,12 @@ mkdocs="*"
 pytest="*"
 cookiecutter="*"
 mkdocs-cinder="*"
+utm = "*"
+notebook = "*"
+rasterio = "*"
+pyproj = "*"
+jupyter-contrib-nbextensions = "*"
+black = {extras = ["jupyter"], version = "*"}
 
 [requires]
 python_version = "3.8"
