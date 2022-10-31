@@ -20,7 +20,7 @@ except IndexError:
 datapath = "/home/" + username + "/data/UNICEF_data/height-model/"
 
 # check if the csv file exists
-output_file = "/home/" + username + "/data/height_model_file_edges.csv"
+output_file = "/home/" + username + "/data/height_model_file_pseudo_mercator_edges.csv"
 if os.path.isfile(output_file):
     sys.exit(
         "Please delete the exisiting csv file if you want to extract the data again"
@@ -46,7 +46,7 @@ min_value_list=[]
 max_value_list=[]
 pixel_y_list = []
 file_name_list = []
-for file in file_list:
+for file in file_list[:3]:
     file_array = rxr.open_rasterio(file)
     x_min_list.append(np.nanmin(file_array.x))
     x_max_list.append(np.nanmax(file_array.x))
@@ -69,12 +69,14 @@ hm_BH_df = pd.DataFrame(
         "right": x_max_list,
         "top": y_max_list,
         "bottom": y_min_list,
+        "min_value":min_value_list,
+        "max_value":max_value_list,
         "pixel_horiz": pixel_x_list,
         "pixel_vert": pixel_y_list,
     }
 )
 
 print("dataframe created")
-filepath = "/home/tim/data/height_model_file_edges.csv"
+filepath = output_file
 hm_BH_df.to_csv(filepath, index=False)
 print("data written to csv file, done!")
