@@ -33,56 +33,63 @@ def reproject_all_BHM(input_file_list):
     return
 
 
-def maxar_to_tif_all(datapath, input_csv):
+def maxar_to_tif_all(datapath_in, datapath_out, input_csv):
 
     # read in the csv file
     maxar_csv = pd.read_csv(input_csv)
 
     # loop over the csv
-    for i in range(10):
+    for i in range(len(maxar_csv)):
         row = maxar_csv.loc[[i]]
-        filecode = "_".join(row.qmdt_cod.values[0].split("-"))
-        filename = datapath + filecode + ".png"
+        filecode = "_".join(row.file_name.values[0].split("-"))[:8]
+        filename = datapath_in + filecode + ".png"
         ulx = row.left.values[0]
         uly = row.top.values[0]
         lrx = row.right.values[0]
         lry = row.bottom.values[0]
         coords = [ulx, uly, lrx, lry]
-        filename_out = datapath + filecode + ".tif"
-        print(coords, filename, filename_out)
-        # maxar_to_tif(filename, filename_out, coords)
+        filename_out = datapath_out + filecode + "_reproject.tif"
+        # print(coords, filename, filename_out)
+        maxar_to_tif(filename, filename_out, coords)
 
     return
 
 
 def reproject_BHM(input_filename, output_filename):
-    ds_repro = gdal.Translate(
+    ds_repro = gdal.Warp(
         output_filename,
         input_filename,
-        options="-a_srs EPSG:3857",
+        dstSRS="EPSG:3857",
     )
     return
 
 
 def maxar_to_tif(input_filename, output_filename, coords):
     ds_repro = gdal.Translate(
-        "input_filename",
-        "output_filename",
-        options="-a_srs EPSG:3857 -a_ullr" + " ".join(coords),
+        output_filename,
+        input_filename,
+        options="-a_srs EPSG:3857 -a_ullr " + " ".join([str(c) for c in coords]),
     )
     return
 
 
 if __name__ == "__main__":
-    input_filename = "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132.tif"
-    output_filename = (
-        "/home/tim/Autumn22_DFCCU/data/raw/2222-BHM/BHM-2222-132_reprojected.tif"
-    )
-    output_filename_2 = (
-        "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132_reprojected.tif"
-    )
+    # input_filename = "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132.tif"
+    # output_filename = (
+    #    "/home/tim/Autumn22_DFCCU/data/raw/2222-BHM/BHM-2222-132_reprojected.tif"
+    # )
+    # output_filename_2 = (
+    #    "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132_reprojected.tif"
+    # )
 
     reproject_all_BHM("/home/tim/Autumn22_DFCCU/data/processed/BHM_file_list.txt")
 
-    datapath = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
-    # maxar_to_tif_all(datapath, "/home/tim/data/UNICEF_data/grids_extent.csv")
+    # datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+    # datapath_out = (
+    #     "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+    # )
+    # maxar_to_tif_all(
+    #     datapath_in,
+    #     datapath_out,
+    #     "/home/tim/data/height_model_file_pseudo_mercator_edges.csv",
+    # )
