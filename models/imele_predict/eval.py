@@ -97,7 +97,8 @@ def eval_main():
     model = torch.nn.DataParallel(model,device_ids=[0,1])
     state_dict = torch.load(model_filename,map_location=torch.device('cpu'))['state_dict']
 
-    #
+    # The pre-trained weights are in slightly different format, so that we need to convert their names.
+
 
     new_state_dict = state_dict.copy()
 
@@ -110,11 +111,11 @@ def eval_main():
 
     model.load_state_dict(new_state_dict)
 
-    #
+    # We are ready to set the model in 'evaluation' mode...
 
     model.eval()
 
-    #
+    # ...and go through all the test images
 
     for i, sample_batched in enumerate(test_loader):
 
