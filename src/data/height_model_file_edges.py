@@ -42,6 +42,8 @@ x_max_list = []
 pixel_x_list = []
 y_max_list = []
 y_min_list = []
+min_value_list=[]
+max_value_list=[]
 pixel_y_list = []
 file_name_list = []
 for file in file_list:
@@ -52,6 +54,8 @@ for file in file_list:
     y_max_list.append(np.nanmax(file_array.y))
     pixel_x_list.append(len(file_array.x))
     pixel_y_list.append(len(file_array.y))
+    min_value_list.append(np.nanmin(file_array))
+    max_value_list.append(np.nanmax(file_array))
     file_name_list.append(
         file[file.find(start := "BHM-") + len(start) : file.find(".tif")]
     )
