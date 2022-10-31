@@ -81,8 +81,8 @@ def define_model(is_resnet, is_densenet, is_senet):
 
 def eval_main():
 
-    csv_filename='test.csv'
-    model_filename='../IMELE_data/Block0_skip_model_110.pth.tar'
+    csv_filename='test0.csv'
+    model_filename=' ../../data/external/Block0_skip_model_110.pth.tar'
 
     batch_size = 1
     test_loader = get_evaluation_data(batch_size, csv_filename)
