@@ -5,3 +5,7 @@ pytest
 numpy
 rioxarray
 pandas
+torch
+torchvision
+cv2
+PIL
