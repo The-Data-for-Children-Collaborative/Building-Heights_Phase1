@@ -40,6 +40,7 @@ def maxar_to_tif_all(datapath_in, datapath_out, input_csv):
 
     # loop over the csv
     for i in range(len(maxar_csv)):
+        print(str(i + 1) + " / " + str(len(maxar_csv)))
         row = maxar_csv.loc[[i]]
         filecode = "_".join(row.file_name.values[0].split("-"))[:8]
         filename = datapath_in + filecode + ".png"
@@ -82,14 +83,14 @@ if __name__ == "__main__":
     #    "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132_reprojected.tif"
     # )
 
-    reproject_all_BHM("/home/tim/Autumn22_DFCCU/data/processed/BHM_file_list.txt")
+    # reproject_all_BHM("/home/tim/Autumn22_DFCCU/data/processed/BHM_file_list.txt")
 
-    # datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
-    # datapath_out = (
-    #     "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-    # )
-    # maxar_to_tif_all(
-    #     datapath_in,
-    #     datapath_out,
-    #     "/home/tim/data/height_model_file_pseudo_mercator_edges.csv",
-    # )
+    datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+    datapath_out = (
+        "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+    )
+    maxar_to_tif_all(
+        datapath_in,
+        datapath_out,
+        "/home/tim/data/height_model_file_pseudo_mercator_edges.csv",
+    )
