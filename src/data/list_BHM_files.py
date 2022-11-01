@@ -10,7 +10,8 @@ import os
 cwd = os.getcwd()
 
 # path to data: must change depending on username!
-datapath = "/home/tim/data/UNICEF_data/height-model/"
+datapath = "/home/tim/data/UNICEF_data/height-model-copy/"
+# datapath = "/home/tim/Autumn22_DFCCU/data/raw/"
 
 # path to write file to (no need to change)
 writepath = "/".join(cwd.split("/")[:4]) + "/data/processed/"
