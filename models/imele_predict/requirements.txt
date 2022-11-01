@@ -1,6 +1,0 @@
-torch
-torchvision
-pandas
-numpy
-cv2
-PIL
