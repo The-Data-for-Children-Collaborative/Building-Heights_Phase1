@@ -21,28 +21,6 @@ from models import modules, net, resnet, densenet, senet
 import sobel
 from transforms import *
 
-parser = argparse.ArgumentParser(description='PyTorch DenseNet Training')
-parser.add_argument('--epochs', default=100
-    , type=int,
-                    help='number of total epochs to run')
-parser.add_argument('--start_epoch', default=0, type=int,
-                    help='manual epoch number (useful on restarts)')
-parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
-                    help='initial learning rate')
-parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
-                    help='weight decay (default: 1e-4)')
-
-parser.add_argument('--data', default='adjust')
-parser.add_argument('--csv', default='')
-parser.add_argument('--model', default='')
-
-args = parser.parse_args()
-save_model = args.data+'/'+args.data+'_model_'
-if not os.path.exists(args.data):
-    os.makedirs(args.data)
-
-
 class depthDataset(Dataset):
 
     def __init__(self, csv_file, transform=None):
@@ -96,12 +74,14 @@ def define_model(is_resnet, is_densenet, is_senet):
 
     if is_resnet:
         original_model = resnet.resnet50(pretrained = True)
-        Encoder = modules.E_resnet(original_model) 
+        Encoder = modules.E_resnet(original_model)
         model = net.model(Encoder, num_features=2048, block_channel = [256, 512, 1024, 2048])
+
     if is_densenet:
         original_model = densenet.densenet161(pretrained=True)
         Encoder = modules.E_densenet(original_model)
         model = net.model(Encoder, num_features=2208, block_channel = [192, 384, 1056, 2208])
+
     if is_senet:
         original_model = senet.senet154(pretrained='imagenet')
         Encoder = modules.E_senet(original_model)
@@ -110,19 +90,27 @@ def define_model(is_resnet, is_densenet, is_senet):
     return model
 
 
-def train_main():
-    
+def train_main(use_cuda):
+
     global args
     args = parser.parse_args()
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
 
     if args.start_epoch != 0:
-        model = torch.nn.DataParallel(model, device_ids=[0, 1])
+
+        if use_cuda == True:
+            model = torch.nn.DataParallel(model, device_ids=[0, 1]).cuda()
+            model = model.cuda()
+        else:
+            model = torch.nn.DataParallel(model, device_ids=[0, 1])
+
         state_dict = torch.load(args.model)['state_dict']
         model.load_state_dict(state_dict)
         batch_size = 2
     else:
-        #model = torch.nn.DataParallel(model, device_ids=[0, 1]).cuda()
+        if use_cuda == True:
+            model = model.cuda()
+
         batch_size = 2
 
     cudnn.benchmark = True
@@ -133,7 +121,7 @@ def train_main():
     for epoch in range(args.start_epoch, args.epochs):
 
         adjust_learning_rate(optimizer, epoch)
-        train(train_loader, model, optimizer, epoch)
+        train(train_loader, model, optimizer, epoch, use_cuda)
 
         out_name = save_model+str(epoch)+'.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()},out_name)
@@ -141,7 +129,7 @@ def train_main():
 
 
 
-def train(train_loader, model, optimizer, epoch):
+def train(train_loader, model, optimizer, epoch, use_cuda):
 
     criterion = nn.L1Loss()
     batch_time = AverageMeter()
@@ -152,7 +140,12 @@ def train(train_loader, model, optimizer, epoch):
     model.train()
 
     cos = nn.CosineSimilarity(dim=1, eps=0)
-    get_gradient = sobel.Sobel()
+
+    if use_cuda ==  True:
+        get_gradient = sobel.Sobel().cuda()
+    else:
+        get_gradient = sobel.Sobel()
+
     global args
     args = parser.parse_args()
 
@@ -164,13 +157,18 @@ def train(train_loader, model, optimizer, epoch):
         # Not sure this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
 
-        #depth = depth.cuda(non_blocking=True)
-        #image = image.cuda()
+        if use_cuda == True:
+            depth = depth.cuda(non_blocking=True)
+            image = image.cuda()
 
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
 
         ones = torch.ones(depth.size(0), 1, depth.size(2),depth.size(3)).float()
+
+        if use_cuda == True:
+            ones = ones.cuda()
+
         ones = torch.autograd.Variable(ones)
         optimizer.zero_grad()
 
@@ -213,9 +211,8 @@ def train(train_loader, model, optimizer, epoch):
 
         batch_time.update(time.time() - end)
         end = time.time()
-   
-        batchSize = depth.size(0)
 
+        batchSize = depth.size(0)
 
         print('Epoch: [{0}][{1}/{2}]\t'
               'Time {batch_time.val:.3f} ({batch_time.sum:.3f})\t'
@@ -252,4 +249,22 @@ def save_checkpoint(state, filename='test.pth.tar'):
     return filename
 
 if __name__ == '__main__':
-    train_main()
+
+    global parser
+    parser = argparse.ArgumentParser(description='PyTorch DenseNet Training')
+    parser.add_argument('--epochs', default=100, type=int, help='number of total epochs to run')
+    parser.add_argument('--start_epoch', default=0, type=int, help='manual epoch number (useful on restarts)')
+    parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, help='initial learning rate')
+    parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
+    parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
+
+    parser.add_argument('--data', default='adjust')
+    parser.add_argument('--csv', default='')
+    parser.add_argument('--model', default='')
+
+    args = parser.parse_args()
+    save_model = args.data + '/' + args.data + '_model_'
+    if not os.path.exists(args.data):
+        os.makedirs(args.data)
+
+    train_main(torch.cuda.is_available())
