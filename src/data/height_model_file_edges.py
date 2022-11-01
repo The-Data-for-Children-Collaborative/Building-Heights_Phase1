@@ -9,32 +9,16 @@ import pandas as pd
 import os.path
 import sys
 
-# username
-try:
-    username = sys.argv[1]
-except IndexError:
-    sys.exit("Please enter username as command line arg")
+### user information: MUST EDIT ###
 
-# list height-model BH(building height) files, adaptet from list_BHM_files.py
-# path to data
-datapath = "/home/" + username + "/data/UNICEF_data/height-model/"
+output_file = "/home/tim/data/maxar_pseudo_mercator_edges.csv"
+input_file = "/home/tim/Autumn22_DFCCU/data/processed/maxar_file_list.txt"
 
-# check if the csv file exists
-output_file = "/home/" + username + "/data/height_model_file_pseudo_mercator_edges.csv"
-if os.path.isfile(output_file):
-    sys.exit(
-        "Please delete the exisiting csv file if you want to extract the data again"
-    )
+###   end of user information   ###
 
-# search through BHM folders and add them to list
-folder_search = glob.glob(datapath + "????-BHM")
-folder_list = []
-for folder in folder_search:
-    folder_list.append(folder)
-file_list = []
-for folder in folder_list:
-    file_search = glob.glob(folder + "/BHM-????-???.tif")
-    file_list.extend(file_search)
+# read in file list from input file
+with open(input_file, "r") as f:
+    file_list = f.readlines()
 
 # extract data from hieght model files
 x_min_list = []
@@ -42,12 +26,12 @@ x_max_list = []
 pixel_x_list = []
 y_max_list = []
 y_min_list = []
-min_value_list=[]
-max_value_list=[]
+min_value_list = []
+max_value_list = []
 pixel_y_list = []
 file_name_list = []
 for file in file_list:
-    file_array = rxr.open_rasterio(file)
+    file_array = rxr.open_rasterio(file.strip())
     x_min_list.append(np.nanmin(file_array.x))
     x_max_list.append(np.nanmax(file_array.x))
     y_min_list.append(np.nanmin(file_array.y))
@@ -69,8 +53,8 @@ hm_BH_df = pd.DataFrame(
         "right": x_max_list,
         "top": y_max_list,
         "bottom": y_min_list,
-        "min_value":min_value_list,
-        "max_value":max_value_list,
+        "min_value": min_value_list,
+        "max_value": max_value_list,
         "pixel_horiz": pixel_x_list,
         "pixel_vert": pixel_y_list,
     }
