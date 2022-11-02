@@ -9,24 +9,21 @@ import os
 # get the current working directory
 cwd = os.getcwd()
 
-# path to data: must change depending on username!
-datapath = "/home/tim/data/UNICEF_data/height_model_subset/"
-# datapath = "/home/tim/Autumn22_DFCCU/data/raw/"
 
-# path to write file to (no need to change)
-writepath = "/".join(cwd.split("/")[:4]) + "/data/processed/"
+def write_files(datapath, filename_out, search_string=""):
 
+    # path to write file to (no need to change)
+    writepath = "/".join(cwd.split("/")[:4]) + "/data/processed/"
 
-# search through BHM folders and add them to list
-folder_search = glob.glob(datapath + "????-BHM")
-folder_list = []
-for folder in folder_search:
-    folder_list.append(folder)
+    # search through BHM folders and add them to list
+    folder_search = glob.glob(datapath + "????-BHM")
+    folder_list = []
+    for folder in folder_search:
+        folder_list.append(folder)
 
-# search through files and write them to file
-with open(writepath + "BHM_file_list_subset_res.txt", "w") as f:
-    for folder in folder_list:
-        file_search = glob.glob(folder + "/BHM-????-???_reproject_resolve.tif")
-        for file in file_search:
-            print(file)
-            f.write(file + "\n")
+    # search through files and write them to file
+    with open(writepath + filename_out, "w") as f:
+        for folder in folder_list:
+            file_search = glob.glob(folder + "/BHM-????-???" + search_string + ".tif")
+            for file in file_search:
+                f.write(file + "\n")
