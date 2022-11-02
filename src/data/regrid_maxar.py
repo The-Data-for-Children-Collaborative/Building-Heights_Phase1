@@ -14,8 +14,8 @@ import list_BHM_files
 
 username = "tim"
 use_subset = True
-convert_BHM = False
-convert_maxar = False
+convert_BHM = True
+convert_maxar = True
 resolve_BHM_pixels = True
 
 ###               end of user input                ###
