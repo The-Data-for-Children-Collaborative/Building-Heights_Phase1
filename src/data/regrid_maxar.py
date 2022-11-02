@@ -16,7 +16,7 @@ username = "tim"
 use_subset = True
 convert_BHM = False
 convert_maxar = False
-resolve_BHM_pixels = False
+resolve_BHM_pixels = True
 
 ###               end of user input                ###
 
@@ -28,7 +28,7 @@ def reproject_all_BHM(input_file_list):
 
     # loop over the files in the list
     for i, input_file in enumerate(input_files):
-        print(str(i + 1) + " / " + str(len(input_files)))
+        print("Regridding BHM files", str(i + 1) + " / " + str(len(input_files)))
         output_file = input_file[:-5] + "_reproject.tif"
         reproject_BHM(input_file.strip(), output_file)
 
@@ -45,7 +45,10 @@ def maxar_to_tif_all(datapath_in, datapath_out, input_csv, grid_extent_csv):
 
     # loop over the csv
     for i in range(len(maxar_csv)):
-        print(str(i + 1) + " / " + str(len(maxar_csv)))
+        print(
+            "Regridding and cropping maxar files",
+            str(i + 1) + " / " + str(len(maxar_csv)),
+        )
         row = maxar_csv.loc[[i]]
         filecode = "_".join(row.file_name.values[0].split("-"))[:8]
         filecode_alt = "-".join(filecode.split("_"))
@@ -79,7 +82,9 @@ def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
 
     # loop over the csv
     for i in range(len(maxar_df)):
-        print(str(i + 1) + " / " + str(len(maxar_df)))
+        print(
+            "Changing resolution of BHM files", str(i + 1) + " / " + str(len(maxar_df))
+        )
         row = bhm_df.loc[[i]]
         filecode = row.file_name.values[0]
         subcode = filecode.split("-")[0]
@@ -91,7 +96,9 @@ def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
         lry = max(row.bottom.values[0], row_alt.bottom.values[0])
         coords = [ulx, uly, lrx, lry]
         pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
-        filename_out = datapath_out + filecode[:8] + "/BHM-" + filecode + "_resolve.tif"
+        filename_out = (
+            datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
+        )
         resolve_BHM(filename, filename_out, coords, pixels)
 
     return
@@ -136,25 +143,24 @@ def maxar_to_tif(input_filename, output_filename, coords_a, coords_b, pixels):
 
 
 if __name__ == "__main__":
-    # input_filename = "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132.tif"
-    # output_filename = (
-    #    "/home/tim/Autumn22_DFCCU/data/raw/2222-BHM/BHM-2222-132_reprojected.tif"
-    # )
-    # output_filename_2 = (
-    #    "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132_reprojected.tif"
-    # )
+
+    # path to write lists of files to
+    listfiles_path = "/home/" + username + "/Autumn22_DFCCU/data/processed/"
+
+    # path to write csvs to
+    csvfiles_path = "/home/" + username + "/data"
 
     # write BHM files to list
     if use_subset:
-        BHM_init_path = "/home/tim/data/UNICEF_data/height_model_subset/"
+        BHM_init_path = "/home/" + username + "/data/UNICEF_data/height_model_subset/"
         BHM_filename = "BHM_subset_raw_list.txt"
     else:
-        BHM_init_path = "/home/tim/data/UNICEF_data/height-model-copy/"
+        BHM_init_path = "/home/" + username + "/data/UNICEF_data/height-model-copy/"
         BHM_filename = "BHM_raw_list.txt"
 
     if convert_BHM:
         list_BHM_files.write_files(BHM_init_path, BHM_filename)
-        reproject_all_BHM("/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename)
+        reproject_all_BHM(listfiles_path + BHM_filename)
 
     if use_subset:
         BHM_filename = "BHM_subset_reproj_list.txt"
@@ -170,62 +176,64 @@ if __name__ == "__main__":
         BHM_csv = "BHM_pm.csv"
 
     height_model_file_edges.write_csv(
-        "/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename,
-        "/home/tim/data/" + BHM_csv,
+        listfiles_path + BHM_filename, csvfiles_path + BHM_csv
     )
 
     if use_subset:
-        maxar_extent_file = "/home/tim/data/UNICEF_data/grids_extent_subset.csv"
+        maxar_extent_file = (
+            "/home/" + username + "/data/UNICEF_data/grids_extent_subset.csv"
+        )
         datapath_in = (
-            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            "/home/"
+            + username
+            + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
         datapath_out = (
-            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            "/home/"
+            + username
+            + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
     else:
-        maxar_extent_file = "/home/tim/data/UNICEF_data/grids_extent.csv"
-        datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+        maxar_extent_file = "/home/" + username + "/data/UNICEF_data/grids_extent.csv"
+        datapath_in = (
+            "/home/"
+            + username
+            + "/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+        )
         datapath_out = (
-            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+            "/home/"
+            + username
+            + "/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
         )
 
     if convert_maxar:
         maxar_to_tif_all(
             datapath_in,
             datapath_out,
-            "/home/tim/data/" + BHM_csv,
+            csvfiles_path + BHM_csv,
             maxar_extent_file,
         )
 
-    # datapath_in = "/home/tim/data/UNICEF_data/height-model-copy/"
-    # datapath_out = "/home/tim/data/UNICEF_data/height-model-copy/"
-
     if use_subset:
-        maxar_directory = (
-            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
-        )
         maxar_filename = "maxar_subset_list.txt"
         maxar_csv = "maxar_subset_pm.csv"
     else:
-        maxar_directory = (
-            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-        )
         maxar_filename = "maxar_list.txt"
         maxar_csv = "maxar_pm.csv"
 
-    list_maxar_tifs.write_files(maxar_directory, maxar_filename)
+    list_maxar_tifs.write_files(datapath_out, maxar_filename)
 
     height_model_file_edges.write_csv(
-        "/home/tim/Autumn22_DFCCU/data/processed/" + maxar_filename,
-        "/home/tim/data/" + maxar_csv,
+        listfiles_path + maxar_filename,
+        csvfiles_path + maxar_csv,
     )
 
     if resolve_BHM_pixels:
         resolve_BHM_all(
             BHM_init_path,
             BHM_init_path,
-            "/home/tim/data/" + maxar_csv,
-            "/home/tim/data/" + BHM_csv,
+            csvfiles_path + maxar_csv,
+            csvfiles_path + BHM_csv,
         )
 
     if use_subset:
@@ -239,6 +247,6 @@ if __name__ == "__main__":
     )
 
     height_model_file_edges.write_csv(
-        "/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename,
-        "/home/tim/data/" + BHM_csv,
+        listfiles_path + BHM_filename,
+        csvfiles_path + BHM_csv,
     )
