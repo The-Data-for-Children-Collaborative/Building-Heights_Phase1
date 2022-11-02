@@ -161,7 +161,7 @@ if __name__ == "__main__":
     listfiles_path = "/home/" + username + "/Autumn22_DFCCU/data/processed/"
 
     # path to write csvs to
-    csvfiles_path = "/home/" + username + "/data"
+    csvfiles_path = "/home/" + username + "/data/"
 
     # write BHM files to list
     if use_subset:
