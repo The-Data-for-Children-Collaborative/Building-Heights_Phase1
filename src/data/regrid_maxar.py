@@ -15,7 +15,8 @@ import list_BHM_files
 username = "tim"
 use_subset = True
 convert_BHM = False
-convert_maxar = True
+convert_maxar = False
+resolve_BHM_pixels = False
 
 ###               end of user input                ###
 
@@ -90,7 +91,7 @@ def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
         lry = max(row.bottom.values[0], row_alt.bottom.values[0])
         coords = [ulx, uly, lrx, lry]
         pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
-        filename_out = datapath_out + "BHM-" + filecode + "_resolve.tif"
+        filename_out = datapath_out + filecode[:8] + "/BHM-" + filecode + "_resolve.tif"
         resolve_BHM(filename, filename_out, coords, pixels)
 
     return
@@ -199,18 +200,45 @@ if __name__ == "__main__":
     # datapath_in = "/home/tim/data/UNICEF_data/height-model-copy/"
     # datapath_out = "/home/tim/data/UNICEF_data/height-model-copy/"
 
-    # list_maxar_tifs.write_files(
-    #     "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-    # )
+    if use_subset:
+        maxar_directory = (
+            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+        )
+        maxar_filename = "maxar_subset_list.txt"
+        maxar_csv = "maxar_subset_pm.csv"
+    else:
+        maxar_directory = (
+            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+        )
+        maxar_filename = "maxar_list.txt"
+        maxar_csv = "maxar_pm.csv"
 
-    # height_model_file_edges.write_csv(
-    #     "/home/tim/Autumn22_DFCCU/data/processed/maxar_file_list.txt",
-    #     "/home/tim/data/maxar_pm.csv",
-    # )
+    list_maxar_tifs.write_files(maxar_directory, maxar_filename)
 
-    # resolve_BHM_all(
-    #     datapath_in,
-    #     datapath_out,
-    #     "/home/tim/data/maxar_pm.csv",
-    #     "/home/tim/data/BHM_pm.csv",
-    # )
+    height_model_file_edges.write_csv(
+        "/home/tim/Autumn22_DFCCU/data/processed/" + maxar_filename,
+        "/home/tim/data/" + maxar_csv,
+    )
+
+    if resolve_BHM_pixels:
+        resolve_BHM_all(
+            BHM_init_path,
+            BHM_init_path,
+            "/home/tim/data/" + maxar_csv,
+            "/home/tim/data/" + BHM_csv,
+        )
+
+    if use_subset:
+        BHM_filename = "BHM_subset_reproj_res_list.txt"
+        BHM_csv = "BHM_subset_pm_res.csv"
+    else:
+        BHM_filename = "BHM_subset_reproj_res_list.txt"
+
+    list_BHM_files.write_files(
+        BHM_init_path, BHM_filename, search_string="_reproject_resolve"
+    )
+
+    height_model_file_edges.write_csv(
+        "/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename,
+        "/home/tim/data/" + BHM_csv,
+    )
