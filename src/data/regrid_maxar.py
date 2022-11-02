@@ -8,17 +8,16 @@ import shutil
 import pandas as pd
 import height_model_file_edges
 import list_maxar_tifs
+import list_BHM_files
 
-# username
-try:
-    username = sys.argv[1]
-except IndexError:
-    sys.exit("Please enter username as command line arg")
+### user input : CHECK THESE BEFORE RUNNING SCRIPT ###
 
-# list height-model BH(building height) files, adaptet from list_BHM_files.py
-# path to data
-datapath = "/home/" + username + "/data/UNICEF_data/height-model/"
-path = "/home/tim/data"
+username = "tim"
+use_subset = True
+convert_BHM = False
+convert_maxar = True
+
+###               end of user input                ###
 
 
 def reproject_all_BHM(input_file_list):
@@ -144,43 +143,74 @@ if __name__ == "__main__":
     #    "/home/tim/data/UNICEF_data/height-model/2222-BHM/BHM-2222-132_reprojected.tif"
     # )
 
-    # reproject_all_BHM(
-    #     "/home/tim/Autumn22_DFCCU/data/processed/BHM_file_list_subset.txt"
-    # )
+    # write BHM files to list
+    if use_subset:
+        BHM_init_path = "/home/tim/data/UNICEF_data/height_model_subset/"
+        BHM_filename = "BHM_subset_raw_list.txt"
+    else:
+        BHM_init_path = "/home/tim/data/UNICEF_data/height-model-copy/"
+        BHM_filename = "BHM_raw_list.txt"
 
-    datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-    datapath_out = (
-        "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-    )
+    if convert_BHM:
+        list_BHM_files.write_files(BHM_init_path, BHM_filename)
+        reproject_all_BHM("/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename)
+
+    if use_subset:
+        BHM_filename = "BHM_subset_reproj_list.txt"
+    else:
+        BHM_filename = "BHM_subset_reproj_list.txt"
+
+    list_BHM_files.write_files(BHM_init_path, BHM_filename, search_string="_reproject")
 
     # first get the input and output csv
-    height_model_file_edges.write_csv(
-        "/home/tim/Autumn22_DFCCU/data/processed/BHM_file_list.txt",
-        "/home/tim/data/BHM_pm.csv",
-    )
-
-    maxar_to_tif_all(
-        datapath_in,
-        datapath_out,
-        "/home/tim/data/BHM_pm.csv",
-        "/home/tim/data/UNICEF_data/grids_extent_subset.csv",
-    )
-
-    datapath_in = "/home/tim/data/UNICEF_data/height-model-copy/"
-    datapath_out = "/home/tim/data/UNICEF_data/height-model-copy/"
-
-    list_maxar_tifs.write_files(
-        "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-    )
+    if use_subset:
+        BHM_csv = "BHM_pm_subset.csv"
+    else:
+        BHM_csv = "BHM_pm.csv"
 
     height_model_file_edges.write_csv(
-        "/home/tim/Autumn22_DFCCU/data/processed/maxar_file_list.txt",
-        "/home/tim/data/maxar_pm.csv",
+        "/home/tim/Autumn22_DFCCU/data/processed/" + BHM_filename,
+        "/home/tim/data/" + BHM_csv,
     )
 
-    resolve_BHM_all(
-        datapath_in,
-        datapath_out,
-        "/home/tim/data/maxar_pm.csv",
-        "/home/tim/data/BHM_pm.csv",
-    )
+    if use_subset:
+        maxar_extent_file = "/home/tim/data/UNICEF_data/grids_extent_subset.csv"
+        datapath_in = (
+            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+        )
+        datapath_out = (
+            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+        )
+    else:
+        maxar_extent_file = "/home/tim/data/UNICEF_data/grids_extent.csv"
+        datapath_in = "/home/tim/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+        datapath_out = (
+            "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+        )
+
+    if convert_maxar:
+        maxar_to_tif_all(
+            datapath_in,
+            datapath_out,
+            "/home/tim/data/" + BHM_csv,
+            maxar_extent_file,
+        )
+
+    # datapath_in = "/home/tim/data/UNICEF_data/height-model-copy/"
+    # datapath_out = "/home/tim/data/UNICEF_data/height-model-copy/"
+
+    # list_maxar_tifs.write_files(
+    #     "/home/tim/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+    # )
+
+    # height_model_file_edges.write_csv(
+    #     "/home/tim/Autumn22_DFCCU/data/processed/maxar_file_list.txt",
+    #     "/home/tim/data/maxar_pm.csv",
+    # )
+
+    # resolve_BHM_all(
+    #     datapath_in,
+    #     datapath_out,
+    #     "/home/tim/data/maxar_pm.csv",
+    #     "/home/tim/data/BHM_pm.csv",
+    # )
