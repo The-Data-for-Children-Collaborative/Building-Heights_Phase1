@@ -64,10 +64,15 @@ def maxar_to_tif_all(datapath_in, datapath_out, input_csv, grid_extent_csv):
         lrx = min(row.right.values[0], row_alt.right.values[0])
         lry = max(row.bottom.values[0], row_alt.bottom.values[0])
         coords_b = [ulx, uly, lrx, lry]
-        pixels = [row.pixel_horiz.values[0], row.pixel_vert.values[0]]
-        filename_out = datapath_out + filecode + "_reproject.tif"
-        # print(coords, filename, filename_out)
-        maxar_to_tif(filename, filename_out, coords_a, coords_b, pixels)
+        if lrx - ulx <= 0:
+            print("Skipping, negative x window")
+        elif uly - lry <= 0:
+            print("Skipping, negative y window")
+        else:
+            pixels = [row.pixel_horiz.values[0], row.pixel_vert.values[0]]
+            filename_out = datapath_out + filecode + "_reproject.tif"
+            # print(coords, filename, filename_out)
+            maxar_to_tif(filename, filename_out, coords_a, coords_b, pixels)
 
     return
 
@@ -81,25 +86,33 @@ def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
     bhm_df = pd.read_csv(bhm_csv)
 
     # loop over the csv
-    for i in range(len(maxar_df)):
-        print(
-            "Changing resolution of BHM files", str(i + 1) + " / " + str(len(maxar_df))
-        )
+    for i in range(len(bhm_df)):
+        print("Changing resolution of BHM files", str(i + 1) + " / " + str(len(bhm_df)))
         row = bhm_df.loc[[i]]
         filecode = row.file_name.values[0]
+        search_string = "_".join(filecode[:8].split("-"))
         subcode = filecode.split("-")[0]
-        row_alt = maxar_df.loc[[i]]
+        row_alt = maxar_df[maxar_df.file_name.str.contains(search_string)]
+        # row_alt = maxar_df.loc[[i]]
         filename = datapath_in + subcode + "-BHM/BHM-" + filecode + ".tif"
-        ulx = max(row_alt.left.values[0], row.left.values[0])
-        uly = min(row.top.values[0], row_alt.top.values[0])
-        lrx = min(row.right.values[0], row_alt.right.values[0])
-        lry = max(row.bottom.values[0], row_alt.bottom.values[0])
+        try:
+            ulx = max(row.left.values[0], row_alt.left.values[0])
+            uly = min(row.top.values[0], row_alt.top.values[0])
+            lrx = min(row.right.values[0], row_alt.right.values[0])
+            lry = max(row.bottom.values[0], row_alt.bottom.values[0])
+        except IndexError:
+            continue
         coords = [ulx, uly, lrx, lry]
-        pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
-        filename_out = (
-            datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
-        )
-        resolve_BHM(filename, filename_out, coords, pixels)
+        if lrx - ulx <= 0:
+            print("Skipping, negative x window")
+        elif uly - lry <= 0:
+            print("Skipping, negative y window")
+        else:
+            pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
+            filename_out = (
+                datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
+            )
+            resolve_BHM(filename, filename_out, coords, pixels)
 
     return
 
@@ -180,9 +193,7 @@ if __name__ == "__main__":
     )
 
     if use_subset:
-        maxar_extent_file = (
-            "/home/" + username + "/data/UNICEF_data/grids_extent_subset.csv"
-        )
+        maxar_extent_file = "/home/" + username + "/data/UNICEF_data/grids_extent.csv"
         datapath_in = (
             "/home/"
             + username
