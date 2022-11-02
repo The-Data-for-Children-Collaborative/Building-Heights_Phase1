@@ -33,6 +33,7 @@ def write_csv(input_file, output_file):
     max_value_list = []
     pixel_y_list = []
     file_name_list = []
+    nan_list = []
     for file in file_list:
         file_array = rxr.open_rasterio(file.strip())
         x_min_list.append(np.nanmin(file_array.x))
@@ -43,6 +44,7 @@ def write_csv(input_file, output_file):
         pixel_y_list.append(len(file_array.y))
         min_value_list.append(np.nanmin(file_array))
         max_value_list.append(np.nanmax(file_array))
+        nan_list.append(int(file_array.isnull().sum()))
         file_name_list.append(
             file[file.find(start := "BHM-") + len(start) : file.find(".tif")]
         )
@@ -60,6 +62,7 @@ def write_csv(input_file, output_file):
             "max_value": max_value_list,
             "pixel_horiz": pixel_x_list,
             "pixel_vert": pixel_y_list,
+            "number_of_nan":nan_list,
         }
     )
 
