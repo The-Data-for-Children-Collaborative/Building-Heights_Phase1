@@ -116,7 +116,7 @@ def eval_main():
     csv_filename='test0.csv'
     model_filename='../../../data/external/Block0_skip_model_110.pth.tar'
 
-    # Input images can be load in batches, resulting in a tensor of shape
+    # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
     #
     # Batches do not make a big difference when running on CPU, but they

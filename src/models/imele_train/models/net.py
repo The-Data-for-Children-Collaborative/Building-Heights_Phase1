@@ -29,16 +29,15 @@ class model(nn.Module):
     def forward(self, x):
         x_block0, x_block1, x_block2, x_block3, x_block4 = self.E(x)
   
-        x= x_block0.view(-1,250,250)
+        x = x_block0.view(-1,250,250)
 
         x = x.cpu().detach().numpy()
-        
+
         #for idx in range(0,len(x)):
         #    x[idx] = x[idx]*100000
         #    np.clip(x[idx], 0, 50000).astype(np.uint16)
         #    filename = str(idx)+'.png'
-        #    cv2.imwrite(filename, x[idx]) 
-         
+        #    cv2.imwrite(filename, x[idx])
         
         x_decoder = self.D2(x_block0, x_block1, x_block2, x_block3, x_block4) 
 
