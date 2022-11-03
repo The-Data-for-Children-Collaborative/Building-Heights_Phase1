@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 from PIL import Image
 import os
+import argparse
 
 from models import modules, net, resnet, densenet, senet
 from transforms import ToTensor, Normalize
@@ -116,16 +117,16 @@ def define_model(is_resnet, is_densenet, is_senet):
 
     return model
 
-def eval_main():
+def eval_main(csv_filename, model_filename):
     '''
         The main function.
 
         Loads the dataset, the pre-trained networks and
         evaluates it over the input data.
-    '''
 
-    csv_filename='test0.csv'
-    model_filename='../../../models/imele_predict/Block0_skip_model_110.pth.tar'
+        Parameters: csv_filename, a string with the path of the CSV file
+                    model_filename, a string with the location of the pretrained model
+    '''
 
     # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
@@ -190,4 +191,15 @@ def eval_main():
 
 
 if __name__ == '__main__':
-    eval_main()
+
+    # At first we construct a command line parser...
+
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--csv', default='')
+    parser.add_argument('--model', default='')
+
+    # ...end we actually use it to parse the command line
+
+    args = parser.parse_args()
+
+    eval_main(args.csv, args.model)
