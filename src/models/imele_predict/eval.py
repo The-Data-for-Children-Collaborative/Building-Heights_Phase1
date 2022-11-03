@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import cv2
 from PIL import Image
+import os
 
 from models import modules, net, resnet, densenet, senet
 from transforms import ToTensor, Normalize
@@ -25,7 +26,16 @@ class depthDataset(Dataset):
     def __getitem__(self, idx):
 
         image_name = self.frame.loc[idx, 0]
-        image = Image.open(image_name)
+
+        _, image_extension = os.path.splitext(image_name)
+
+        # If the extension of file is .npy we treat is as a numpy array
+        # Otherwise, we treat is an image, and Pillow will take care of it.
+
+        if image_extension == '.npy':
+            image = np.load(image_name)
+        else:
+            image = Image.open(image_name)
 
         sample = {'image': image}
 
