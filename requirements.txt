@@ -1,11 +1,11 @@
 mkdocs
-mkdocs - cinder
+mkdocs-cinder
 cookiecutter
 pytest
 numpy
-rioxarray
 pandas
 torch
 torchvision
-cv2
-PIL
+opencv-python
+pillow
+scipy
