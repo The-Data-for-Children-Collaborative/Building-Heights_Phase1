@@ -128,6 +128,14 @@ def eval_main(csv_filename, model_filename):
                     model_filename, a string with the location of the pretrained model
     '''
 
+    if(os.path.isfile(csv_filename) == False):
+        print('The specified CSV file ({}) does not exist. Quitting.'.format(csv_filename))
+        return
+
+    if(os.path.isfile(model_filename) == False):
+        print('The specified model file ({}) does not exist. Quitting.'.format(model_filename))
+        return
+
     # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
     #
