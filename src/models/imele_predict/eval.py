@@ -200,7 +200,7 @@ def eval_main(csv_filename, model_filename):
 
 if __name__ == '__main__':
 
-    # At first we construct a command line parser...
+    # At first, we construct a command line parser...
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--csv', default='')
