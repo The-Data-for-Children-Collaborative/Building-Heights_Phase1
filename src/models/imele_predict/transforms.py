@@ -21,7 +21,7 @@ class ToTensor(object):
         image = sample['image']
         image = self.to_tensor(image) / 255
 
-        return {'image': image}
+        return {'image': image, 'output_name': sample['output_name']}
 
     def to_tensor(self, pic):
 
@@ -67,11 +67,11 @@ class Normalize(object):
         Returns:
             Tensor: Normalized image.
         """
-        image = sample['image']
 
+        image = sample['image']
         image = self.normalize(image, self.mean, self.std)
 
-        return {'image': image}
+        return {'image': image, 'output_name': sample['output_name']}
 
     def normalize(self, tensor, mean, std):
         """Normalize a tensor image with mean and standard deviation.

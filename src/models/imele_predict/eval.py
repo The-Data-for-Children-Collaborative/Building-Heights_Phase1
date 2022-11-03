@@ -26,6 +26,7 @@ class depthDataset(Dataset):
     def __getitem__(self, idx):
 
         image_name = self.frame.loc[idx, 0]
+        output_name = self.frame.loc[idx, 1]
 
         _, image_extension = os.path.splitext(image_name)
 
@@ -37,7 +38,7 @@ class depthDataset(Dataset):
         else:
             image = Image.open(image_name)
 
-        sample = {'image': image}
+        sample = {'image': image, 'output_name': output_name}
 
         if self.transform:
             sample = self.transform(sample)
@@ -124,7 +125,7 @@ def eval_main():
     '''
 
     csv_filename='test0.csv'
-    model_filename='../../../data/external/Block0_skip_model_110.pth.tar'
+    model_filename='../../../models/imele_predict/Block0_skip_model_110.pth.tar'
 
     # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
@@ -183,8 +184,9 @@ def eval_main():
         print('Output #{}, shape (after resampling) is {}'.format(i,output.shape))
 
         # The output is saved in numpy format
+        # TODO: this works only on the first element of a batch
 
-        np.save('img{}.out.npy'.format(i), output.detach().numpy()[0,0], allow_pickle=False)
+        np.save(sample_batched['output_name'][0], output.detach().numpy()[0,0], allow_pickle=False)
 
 
 if __name__ == '__main__':
