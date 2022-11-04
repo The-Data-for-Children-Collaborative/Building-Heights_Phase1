@@ -6,7 +6,7 @@ The building height data covers a region of Sao Paulo and can be downloaded from
 
 We will (eventually) use three sources of satellite images: high-resolution maxar data (not publicly available), lower resolution data from [Sentinel 2](https://developers.google.com/earth-engine/datasets/catalog/sentinel-2), and radar images from [Sentiel 1](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD).
 
-Currently, this model[here](https://github.com/speed8928/IMELE) is being used and src/model/imele_predict (functioning code for predicting height with preset weights)
+Currently, this model [here](https://github.com/speed8928/IMELE) is being used, see src/model/imele_predict for a functioning code for predicting height with preset weights.
 
 The pipeline for data preprocessing (georeferecing, downscaling building height data, cropping images to same size) can be found in src/data.
 
@@ -17,7 +17,7 @@ Recommended installation procedure is still to come! For now, the packages requi
 
     pip install -r requirements.txt
     
-For the data processing gdal and for inspecting the buildingheit model rioxarray are required, which can be installed via conda (more detailed process will follow).
+For the data processing gdal and for inspecting the building height model rioxarray are required, which can be installed via conda (more detailed process will follow).
 
 ### General outline
 ------------
