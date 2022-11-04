@@ -12,8 +12,14 @@ import list_BHM_files
 from os.path import expanduser
 
 
-def reproject_all_BHM(input_file_list):
+def reproject_all_bhm(input_file_list):
+    """Reproject all the BHM files.
 
+    Parameters
+    ----------
+    input_file_list : str
+        name of file containing list of BHM files to reproject
+    """
     with open(input_file_list, "r") as f:
         input_files = f.readlines()
 
@@ -21,13 +27,23 @@ def reproject_all_BHM(input_file_list):
     for i, input_file in enumerate(input_files):
         print("Regridding BHM files", str(i + 1) + " / " + str(len(input_files)))
         output_file = input_file[:-5] + "_reproject.tif"
-        reproject_BHM(input_file.strip(), output_file)
-
-    return
+        gdal_reproject_bhm(input_file.strip(), output_file)
 
 
-def maxar_to_tif_all(datapath_in, datapath_out, input_csv, grid_extent_csv):
+def georef_crop_all_maxar(datapath_in, datapath_out, input_csv, grid_extent_csv):
+    """Geo-reference the maxar png files and crop them to the BHM extents.
 
+    Parameters
+    ----------
+    datapath_in : str
+        input datapath for the maxar png files
+    datapath_out : str
+        output datapath for the georeferenced files
+    input_csv : str
+        maxar csv file
+    grid_extent_csv : str
+        grid extents for the maxar files
+    """
     # read in the csv file
     maxar_csv = pd.read_csv(input_csv)
 
@@ -63,13 +79,23 @@ def maxar_to_tif_all(datapath_in, datapath_out, input_csv, grid_extent_csv):
             pixels = [row.pixel_horiz.values[0], row.pixel_vert.values[0]]
             filename_out = datapath_out + filecode + "_reproject.tif"
             # print(coords, filename, filename_out)
-            maxar_to_tif(filename, filename_out, coords_a, coords_b, pixels)
-
-    return
+            gdal_georef_crop_maxar(filename, filename_out, coords_a, coords_b, pixels)
 
 
-def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
+def resolve_bhm_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
+    """Change the resolution of BHM images to match maxar data.
 
+    Parameters
+    ----------
+    datapath_in : str
+        input datapath for the maxar png files
+    datapath_out : str
+        output datapath for the georeferenced files
+    maxar_csv : str
+        maxar csv file (cropped to bhm extents)
+    bhm_csv : str
+        bhm csv file (reprojected to epsg co-ords)
+    """
     # read in the csv file
     maxar_df = pd.read_csv(maxar_csv)
 
@@ -103,23 +129,37 @@ def resolve_BHM_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
             filename_out = (
                 datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
             )
-            resolve_BHM(filename, filename_out, coords, pixels)
-
-    return
+            gdal_resolve_bhm(filename, filename_out, coords, pixels)
 
 
-def reproject_BHM(input_filename, output_filename):
-    ds_repro = gdal.Warp(
-        output_filename,
-        input_filename,
-        dstSRS="EPSG:3857",
-    )
-    return
+def gdal_reproject_bhm(input_filename, output_filename):
+    """Change BHM file to EPSG:3857 reference.
+
+    Parameters
+    ----------
+    input_filename : str
+        name of the input file
+    output_filename : str
+        name of the output file
+    """
+    gdal.Warp(output_filename, input_filename, dstSRS="EPSG:3857")
 
 
-def resolve_BHM(input_filename, output_filename, coords, pixels):
+def gdal_resolve_bhm(input_filename, output_filename, coords, pixels):
+    """Resolve BHM file to speficic pixellation.
 
-    ds_repro = gdal.Translate(
+    Parameters
+    ----------
+    input_filename : str
+        name of the input file
+    output_filename : str
+        name of the output file
+    coords : list of floats
+        co-ords [x0, y1, x1, y0] of projection window
+    pixels : list of ints
+        [x, y] pixels to resolve into
+    """
+    gdal.Translate(
         output_filename,
         input_filename,
         options="-projwin "
@@ -128,26 +168,37 @@ def resolve_BHM(input_filename, output_filename, coords, pixels):
         + " ".join([str(p) for p in pixels]),
     )
 
-    return
 
+def gdal_georef_crop_maxar(input_filename, output_filename, coords_in, coords_out):
+    """Resolve BHM file to speficic pixellation.
 
-def maxar_to_tif(input_filename, output_filename, coords_a, coords_b, pixels):
-    ds_repro = gdal.Translate(
+    Parameters
+    ----------
+    input_filename : str
+        name of the input file
+    output_filename : str
+        name of the output file
+    coords_in : list of floats
+        co-ords [x0, y1, x1, y0] corresponding to the input png file
+    coords_out : list of floats
+        co-ords [x0, y1, x1, y0] corresponding to the output projection window.
+    """
+    gdal.Translate(
         "tmpgdal.png",
         input_filename,
-        options="-a_srs EPSG:3857 -a_ullr " + " ".join([str(c) for c in coords_a]),
+        options="-a_srs EPSG:3857 -a_ullr " + " ".join([str(c) for c in coords_in]),
     )
 
-    ds_repro = gdal.Translate(
+    gdal.Translate(
         output_filename,
         "tmpgdal.png",
-        options="-of GTiff -projwin " + " ".join([str(c) for c in coords_b]),
+        options="-of GTiff -projwin " + " ".join([str(c) for c in coords_out]),
     )
     return
 
 
-def tf_from_yn(yn):
-
+def _tf_from_yn(yn):
+    """Return True / False based on y/n input."""
     if yn == "y":
         return True
     else:
@@ -157,10 +208,12 @@ def tf_from_yn(yn):
 if __name__ == "__main__":
 
     # user input about which parts of pipeline to run
-    use_subset = tf_from_yn(input("Use subset of data (y) or full dataset (n)? [y/n] "))
-    convert_BHM = tf_from_yn(input("Convert BHM co-ordinates to epsg:3857? [y/n] "))
-    convert_maxar = tf_from_yn(input("Crop maxar images to BHM extents? [y/n] "))
-    resolve_BHM_pixels = tf_from_yn(input("Downsample BHM to maxar size? [y/n] "))
+    use_subset = _tf_from_yn(
+        input("Use subset of data (y) or full dataset (n)? [y/n] ")
+    )
+    convert_BHM = _tf_from_yn(input("Convert BHM co-ordinates to epsg:3857? [y/n] "))
+    convert_maxar = _tf_from_yn(input("Crop maxar images to BHM extents? [y/n] "))
+    resolve_BHM_pixels = _tf_from_yn(input("Downsample BHM to maxar size? [y/n] "))
 
     # check if subset is False
     if not use_subset:
@@ -187,7 +240,7 @@ if __name__ == "__main__":
 
     if convert_BHM:
         list_BHM_files.write_files(BHM_init_path, BHM_filename)
-        reproject_all_BHM(listfiles_path + BHM_filename)
+        reproject_all_bhm(listfiles_path + BHM_filename)
 
     if use_subset:
         BHM_filename = "BHM_subset_reproj_list.txt"
@@ -222,7 +275,7 @@ if __name__ == "__main__":
         )
 
     if convert_maxar:
-        maxar_to_tif_all(
+        georef_crop_all_maxar(
             datapath_in,
             datapath_out,
             csvfiles_path + BHM_csv,
@@ -244,7 +297,7 @@ if __name__ == "__main__":
     )
 
     if resolve_BHM_pixels:
-        resolve_BHM_all(
+        resolve_bhm_all(
             BHM_init_path,
             BHM_init_path,
             csvfiles_path + maxar_csv,
