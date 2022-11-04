@@ -9,16 +9,7 @@ import pandas as pd
 import height_model_file_edges
 import list_maxar_tifs
 import list_BHM_files
-
-### user input : CHECK THESE BEFORE RUNNING SCRIPT ###
-
-username = "tim"
-use_subset = True
-convert_BHM = True
-convert_maxar = True
-resolve_BHM_pixels = True
-
-###               end of user input                ###
+from os.path import expanduser
 
 
 def reproject_all_BHM(input_file_list):
@@ -155,20 +146,43 @@ def maxar_to_tif(input_filename, output_filename, coords_a, coords_b, pixels):
     return
 
 
+def tf_from_yn(yn):
+
+    if yn == "y":
+        return True
+    else:
+        return False
+
+
 if __name__ == "__main__":
 
+    # user input about which parts of pipeline to run
+    use_subset = tf_from_yn(input("Use subset of data (y) or full dataset (n)? [y/n] "))
+    convert_BHM = tf_from_yn(input("Convert BHM co-ordinates to epsg:3857? [y/n] "))
+    convert_maxar = tf_from_yn(input("Crop maxar images to BHM extents? [y/n] "))
+    resolve_BHM_pixels = tf_from_yn(input("Downsample BHM to maxar size? [y/n] "))
+
+    # check if subset is False
+    if not use_subset:
+        choice = input("Are you sure you want to run on the full dataset? [y/n]")
+        if choice == "n":
+            use_subset = True
+
+    # get the home directory
+    homedir = expanduser("~")
+
     # path to write lists of files to
-    listfiles_path = "/home/" + username + "/Autumn22_DFCCU/data/processed/"
+    listfiles_path = homedir + "/Autumn22_DFCCU/data/processed/"
 
     # path to write csvs to
-    csvfiles_path = "/home/" + username + "/data/"
+    csvfiles_path = homedir + "/data/"
 
     # write BHM files to list
     if use_subset:
-        BHM_init_path = "/home/" + username + "/data/UNICEF_data/height_model_subset/"
+        BHM_init_path = homedir + "/data/UNICEF_data/height_model_subset/"
         BHM_filename = "BHM_subset_raw_list.txt"
     else:
-        BHM_init_path = "/home/" + username + "/data/UNICEF_data/height-model-copy/"
+        BHM_init_path = homedir + "/data/UNICEF_data/height-model-copy/"
         BHM_filename = "BHM_raw_list.txt"
 
     if convert_BHM:
@@ -193,28 +207,18 @@ if __name__ == "__main__":
     )
 
     if use_subset:
-        maxar_extent_file = "/home/" + username + "/data/UNICEF_data/grids_extent.csv"
+        maxar_extent_file = homedir + "/data/UNICEF_data/grids_extent.csv"
         datapath_in = (
-            "/home/"
-            + username
-            + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
         datapath_out = (
-            "/home/"
-            + username
-            + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
     else:
-        maxar_extent_file = "/home/" + username + "/data/UNICEF_data/grids_extent.csv"
-        datapath_in = (
-            "/home/"
-            + username
-            + "/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
-        )
+        maxar_extent_file = homedir + "/data/UNICEF_data/grids_extent.csv"
+        datapath_in = homedir + "/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
         datapath_out = (
-            "/home/"
-            + username
-            + "/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
+            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
         )
 
     if convert_maxar:
