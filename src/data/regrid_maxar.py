@@ -207,7 +207,18 @@ def _tf_from_yn(yn):
 
 if __name__ == "__main__":
 
+    # get the home directory
+    homedir = expanduser("~")
+
+    # get the data path
+    datadir = homedir + "/data/"
+
     # user input about which parts of pipeline to run
+    use_default_datadir = _tf_from_yn(
+        input("Use default data directory (" + datadir + ")? [y/n] ")
+    )
+    if not use_default_datadir:
+        datadir = input("Please enter the path to the S3 data bucket: ")
     use_subset = _tf_from_yn(
         input("Use subset of data (y) or full dataset (n)? [y/n] ")
     )
@@ -221,21 +232,15 @@ if __name__ == "__main__":
         if choice == "n":
             use_subset = True
 
-    # get the home directory
-    homedir = expanduser("~")
-
     # path to write lists of files to
     listfiles_path = homedir + "/Autumn22_DFCCU/data/processed/"
 
-    # path to write csvs to
-    csvfiles_path = homedir + "/data/"
-
     # write BHM files to list
     if use_subset:
-        BHM_init_path = homedir + "/data/UNICEF_data/height_model_subset/"
+        BHM_init_path = datadir + "UNICEF_data/height_model_subset/"
         BHM_filename = "BHM_subset_raw_list.txt"
     else:
-        BHM_init_path = homedir + "/data/UNICEF_data/height-model-copy/"
+        BHM_init_path = datadir + "UNICEF_data/height-model-copy/"
         BHM_filename = "BHM_raw_list.txt"
 
     if convert_BHM:
@@ -255,30 +260,26 @@ if __name__ == "__main__":
     else:
         BHM_csv = "BHM_pm.csv"
 
-    height_model_file_edges.write_csv(
-        listfiles_path + BHM_filename, csvfiles_path + BHM_csv
-    )
+    height_model_file_edges.write_csv(listfiles_path + BHM_filename, datadir + BHM_csv)
 
     if use_subset:
-        maxar_extent_file = homedir + "/data/UNICEF_data/grids_extent.csv"
+        maxar_extent_file = datadir + "UNICEF_data/grids_extent.csv"
         datapath_in = (
-            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            datadir + "UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
         datapath_out = (
-            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
+            datadir + "UNICEF_data/kaggle_maxar_tiles_subset/data/maxar_tiles/"
         )
     else:
-        maxar_extent_file = homedir + "/data/UNICEF_data/grids_extent.csv"
-        datapath_in = homedir + "/data/UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
-        datapath_out = (
-            homedir + "/data/UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
-        )
+        maxar_extent_file = datadir + "/UNICEF_data/grids_extent.csv"
+        datapath_in = datadir + "UNICEF_data/kaggle_maxar_tiles/data/maxar_tiles/"
+        datapath_out = datadir + "UNICEF_data/kaggle_maxar_tiles_copy/data/maxar_tiles/"
 
     if convert_maxar:
         georef_crop_all_maxar(
             datapath_in,
             datapath_out,
-            csvfiles_path + BHM_csv,
+            datadir + BHM_csv,
             maxar_extent_file,
         )
 
@@ -293,15 +294,15 @@ if __name__ == "__main__":
 
     height_model_file_edges.write_csv(
         listfiles_path + maxar_filename,
-        csvfiles_path + maxar_csv,
+        datadir + maxar_csv,
     )
 
     if resolve_BHM_pixels:
         resolve_bhm_all(
             BHM_init_path,
             BHM_init_path,
-            csvfiles_path + maxar_csv,
-            csvfiles_path + BHM_csv,
+            datadir + maxar_csv,
+            datadir + BHM_csv,
         )
 
     if use_subset:
@@ -316,5 +317,5 @@ if __name__ == "__main__":
 
     height_model_file_edges.write_csv(
         listfiles_path + BHM_filename,
-        csvfiles_path + BHM_csv,
+        datadir + BHM_csv,
     )
