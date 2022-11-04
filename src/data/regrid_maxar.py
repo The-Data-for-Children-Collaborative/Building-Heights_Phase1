@@ -76,7 +76,7 @@ def georef_crop_all_maxar(datapath_in, datapath_out, input_csv, grid_extent_csv)
             pixels = [row.pixel_horiz.values[0], row.pixel_vert.values[0]]
             filename_out = datapath_out + filecode + "_reproject.tif"
             # print(coords, filename, filename_out)
-            gdal_georef_crop_maxar(filename, filename_out, coords_a, coords_b, pixels)
+            gdal_georef_crop_maxar(filename, filename_out, coords_a, coords_b)
 
 
 def resolve_bhm_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
