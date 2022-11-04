@@ -1,14 +1,12 @@
-# Pivigo Data Science Template
+# DFCCU: Predicting building height from satellite images
 
-_A recommended minimal project structure for doing and sharing data science work._
+The aim of this project is to train a convolutional-deconvolutional neural network (such as the one described [here](https://arxiv.org/abs/1802.10249) or [here](https://www.mdpi.com/2072-4292/12/17/2719)) to predict building height data from satellite images. 
 
+The building height data covers a region of Sao Paulo and can be downloaded from [this repository](https://www.kaggle.com/datasets/andasampa/height-model).
 
-This template is based on the good work from the [Cookiecutter project](http://drivendata.github.io/cookiecutter-data-science/). Please visit the website for a more detailed explanation of how to get the most out of the template and best practices in general. In particular, we strongly suggest that you work in the context of a virtual environment for this project. Please feel free to change the directory structure as you wish. 
+We will (eventually) use three sources of satellite images: high-resolution maxar data (not publicly available), lower resolution data from [Sentinel 2](https://developers.google.com/earth-engine/datasets/catalog/sentinel-2), and radar images from [Sentiel 1](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD).
 
-The structure we have given you is a lightweight version of the full cookiecutter-data-science template. The full version includes a number of functionalities that are often not needed, such as a Makefile and setup scripts, as well as a .env file for holding keys. In some cases you may want this added functionality and may, therefore, substitute this template for the original cookiecutter-data-science template.
-
-
-The directory structure of your new project looks like this: 
+This project is based on the [Cookiecutter template](http://drivendata.github.io/cookiecutter-data-science/) for data science projects and is structured as follows:
 
 ```
 ├── README.md          <- The top-level README for developers using this project.
@@ -49,12 +47,11 @@ The directory structure of your new project looks like this:
 
 ```
 
-## Contributing
 
-The creators of the Cookiecutter project welcome contributions! [See the docs for guidelines](https://drivendata.github.io/cookiecutter-data-science/#contributing).
-
-### Installing development requirements
+### Installation
 ------------
+
+Recommended installation procedure is still to come! For now, the packages required to run the CNN model can be obtained via
 
     pip install -r requirements.txt
 
