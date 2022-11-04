@@ -2,13 +2,10 @@
 Regrid the maxar png files to match the BHM tif files.
 """
 
-import sys
 from osgeo import gdal
-import shutil
 import pandas as pd
 import height_model_file_edges
-import list_maxar_tifs
-import list_BHM_files
+import list_files
 from os.path import expanduser
 
 
@@ -232,8 +229,11 @@ if __name__ == "__main__":
         if choice == "n":
             use_subset = True
 
+    # path to write csv summary files to
+    csvs_path = datadir + "UNICEF_data/summary_data/"
+
     # path to write lists of files to
-    listfiles_path = homedir + "/Autumn22_DFCCU/data/processed/"
+    listfiles_path = csvs_path + "file_lists/"
 
     # write BHM files to list
     if use_subset:
@@ -244,7 +244,7 @@ if __name__ == "__main__":
         BHM_filename = "BHM_raw_list.txt"
 
     if convert_BHM:
-        list_BHM_files.write_files(BHM_init_path, BHM_filename)
+        list_files.list_BHM_files(BHM_init_path, listfiles_path, BHM_filename)
         reproject_all_bhm(listfiles_path + BHM_filename)
 
     if use_subset:
@@ -252,7 +252,9 @@ if __name__ == "__main__":
     else:
         BHM_filename = "BHM_subset_reproj_list.txt"
 
-    list_BHM_files.write_files(BHM_init_path, BHM_filename, search_string="_reproject")
+    list_files.list_BHM_files(
+        BHM_init_path, listfiles_path, BHM_filename, search_string="_reproject"
+    )
 
     # first get the input and output csv
     if use_subset:
@@ -260,7 +262,9 @@ if __name__ == "__main__":
     else:
         BHM_csv = "BHM_pm.csv"
 
-    height_model_file_edges.write_csv(listfiles_path + BHM_filename, datadir + BHM_csv)
+    height_model_file_edges.write_csv(
+        listfiles_path + BHM_filename, csvs_path + BHM_csv
+    )
 
     if use_subset:
         maxar_extent_file = datadir + "UNICEF_data/grids_extent.csv"
@@ -279,7 +283,7 @@ if __name__ == "__main__":
         georef_crop_all_maxar(
             datapath_in,
             datapath_out,
-            datadir + BHM_csv,
+            csvs_path + BHM_csv,
             maxar_extent_file,
         )
 
@@ -290,19 +294,19 @@ if __name__ == "__main__":
         maxar_filename = "maxar_list.txt"
         maxar_csv = "maxar_pm.csv"
 
-    list_maxar_tifs.write_files(datapath_out, maxar_filename)
+    list_files.list_maxar_files(datapath_out, listfiles_path, maxar_filename)
 
     height_model_file_edges.write_csv(
         listfiles_path + maxar_filename,
-        datadir + maxar_csv,
+        csvs_path + maxar_csv,
     )
 
     if resolve_BHM_pixels:
         resolve_bhm_all(
             BHM_init_path,
             BHM_init_path,
-            datadir + maxar_csv,
-            datadir + BHM_csv,
+            csvs_path + maxar_csv,
+            csvs_path + BHM_csv,
         )
 
     if use_subset:
@@ -311,11 +315,11 @@ if __name__ == "__main__":
     else:
         BHM_filename = "BHM_subset_reproj_res_list.txt"
 
-    list_BHM_files.write_files(
-        BHM_init_path, BHM_filename, search_string="_reproject_resolve"
+    list_files.list_BHM_files(
+        BHM_init_path, listfiles_path, BHM_filename, search_string="_reproject_resolve"
     )
 
     height_model_file_edges.write_csv(
         listfiles_path + BHM_filename,
-        datadir + BHM_csv,
+        csvs_path + BHM_csv,
     )

@@ -10,10 +10,7 @@ import os
 cwd = os.getcwd()
 
 
-def write_files(datapath, filename_out, search_string=""):
-
-    # path to write file to (no need to change)
-    writepath = "/".join(cwd.split("/")[:4]) + "/data/processed/"
+def list_BHM_files(datapath, writepath, filename_out, search_string=""):
 
     # search through BHM folders and add them to list
     folder_search = glob.glob(datapath + "????-BHM")
@@ -27,3 +24,12 @@ def write_files(datapath, filename_out, search_string=""):
             file_search = glob.glob(folder + "/BHM-????-???" + search_string + ".tif")
             for file in file_search:
                 f.write(file + "\n")
+
+
+def list_maxar_files(datapath, writepath, filename_out):
+
+    # search through files and write them to file
+    with open(writepath + filename_out, "w") as f:
+        file_search = glob.glob(datapath + "*_reproject.tif")
+        for file in file_search:
+            f.write(file + "\n")
