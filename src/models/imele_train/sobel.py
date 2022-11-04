@@ -26,6 +26,4 @@ class Sobel(nn.Module):
         #i1 = x[0].cpu().detach().numpy()
         #i2 = x[1].cpu().detach().numpy()
 
-
-        
         return out

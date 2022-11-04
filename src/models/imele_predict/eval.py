@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 import cv2
 from PIL import Image
+import os
+import argparse
 
 from models import modules, net, resnet, densenet, senet
 from transforms import ToTensor, Normalize
@@ -25,9 +27,19 @@ class depthDataset(Dataset):
     def __getitem__(self, idx):
 
         image_name = self.frame.loc[idx, 0]
-        image = Image.open(image_name)
+        output_name = self.frame.loc[idx, 1]
 
-        sample = {'image': image}
+        _, image_extension = os.path.splitext(image_name)
+
+        # If the extension of file is .npy we treat is as a numpy array
+        # Otherwise, we treat is an image, and Pillow will take care of it.
+
+        if image_extension == '.npy':
+            image = np.load(image_name)
+        else:
+            image = Image.open(image_name)
+
+        sample = {'image': image, 'output_name': output_name}
 
         if self.transform:
             sample = self.transform(sample)
@@ -105,16 +117,24 @@ def define_model(is_resnet, is_densenet, is_senet):
 
     return model
 
-def eval_main():
+def eval_main(csv_filename, model_filename):
     '''
         The main function.
 
         Loads the dataset, the pre-trained networks and
         evaluates it over the input data.
+
+        Parameters: csv_filename, a string with the path of the CSV file
+                    model_filename, a string with the location of the pretrained model
     '''
 
-    csv_filename='test0.csv'
-    model_filename='../../../data/external/Block0_skip_model_110.pth.tar'
+    if(os.path.isfile(csv_filename) == False):
+        print('The specified CSV file ({}) does not exist. Quitting.'.format(csv_filename))
+        return
+
+    if(os.path.isfile(model_filename) == False):
+        print('The specified model file ({}) does not exist. Quitting.'.format(model_filename))
+        return
 
     # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
@@ -173,9 +193,21 @@ def eval_main():
         print('Output #{}, shape (after resampling) is {}'.format(i,output.shape))
 
         # The output is saved in numpy format
+        # TODO: this works only on the first element of a batch
 
-        np.save('img{}.out.npy'.format(i), output.detach().numpy()[0,0], allow_pickle=False)
+        np.save(sample_batched['output_name'][0], output.detach().numpy()[0,0], allow_pickle=False)
 
 
 if __name__ == '__main__':
-    eval_main()
+
+    # At first, we construct a command line parser...
+
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--csv', default='')
+    parser.add_argument('--model', default='')
+
+    # ...end we actually use it to parse the command line
+
+    args = parser.parse_args()
+
+    eval_main(args.csv, args.model)

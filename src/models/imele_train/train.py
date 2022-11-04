@@ -189,7 +189,6 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
                    use_cuda, a bool specifying whether we are using CUDA or not
     '''
 
-    criterion = nn.L1Loss()
     batch_time = AverageMeter()
     losses = AverageMeter()
 
@@ -209,7 +208,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
 
         image, depth = sample_batched['image'], sample_batched['depth']
 
-        # Not sure this resizing should go here, but it does the trick!
+        # Not sure if this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
 
         if use_cuda == True:
@@ -251,7 +250,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         loss = loss_depth + loss_normal + (loss_dx + loss_dy)
         losses.update(loss.data, image.size(0))
 
-        # Then we backpropagate to calculate the gradients and we run one optimizer step
+        # Then we backpropagate to calculate the gradients, and we run one optimizer step
 
         loss.backward()
         optimizer.step()

@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 class ToTensor(object):
     '''
@@ -20,28 +21,32 @@ class ToTensor(object):
         image = sample['image']
         image = self.to_tensor(image) / 255
 
-        return {'image': image}
+        return {'image': image, 'output_name': sample['output_name']}
 
     def to_tensor(self, pic):
 
-        # handle PIL Image
-        if pic.mode == 'I':
-            img = torch.from_numpy(np.array(pic, np.int32, copy=False))
-        elif pic.mode == 'I;16':
-            img = torch.from_numpy(np.array(pic, np.int16, copy=False))
-        else:
-            img = torch.ByteTensor(
-                torch.ByteStorage.from_buffer(pic.tobytes()))
-
-        # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
-        if pic.mode == 'YCbCr':
+        if isinstance(pic, np.ndarray):
+            # Handle numpy tensor, removing the opacity channel
+            img = torch.from_numpy(pic[:, :, (0, 1, 2)])
             nchannel = 3
-        elif pic.mode == 'I;16':
-            nchannel = 1
         else:
-            nchannel = len(pic.mode)
+            # Handle PIL Image
+            if pic.mode == 'I':
+                img = torch.from_numpy(np.array(pic, np.int32, copy=False))
+            elif pic.mode == 'I;16':
+                img = torch.from_numpy(np.array(pic, np.int16, copy=False))
+            else:
+                img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))
 
-        img = img.view(pic.size[1], pic.size[0], nchannel)
+            # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
+            if pic.mode == 'YCbCr':
+                nchannel = 3
+            elif pic.mode == 'I;16':
+                nchannel = 1
+            else:
+                nchannel = len(pic.mode)
+
+            img = img.view(pic.size[1], pic.size[0], nchannel)
 
         # Put it from HWC to CHW format
         # Yikes, this transpose takes 80% of the loading time/CPU
@@ -62,11 +67,11 @@ class Normalize(object):
         Returns:
             Tensor: Normalized image.
         """
-        image = sample['image']
 
+        image = sample['image']
         image = self.normalize(image, self.mean, self.std)
 
-        return {'image': image}
+        return {'image': image, 'output_name': sample['output_name']}
 
     def normalize(self, tensor, mean, std):
         """Normalize a tensor image with mean and standard deviation.
