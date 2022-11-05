@@ -6,10 +6,10 @@ from osgeo import gdal
 import pandas as pd
 import height_model_file_edges
 import list_files
-from os.path import expanduser
+from os.path import expanduser, isfile
 
 
-def reproject_all_bhm(input_file_list):
+def reproject_all_bhm(input_file_list, overwrite_files=False):
     """Reproject all the BHM files.
 
     Parameters
@@ -24,10 +24,14 @@ def reproject_all_bhm(input_file_list):
     for i, input_file in enumerate(input_files):
         print("Regridding BHM files", str(i + 1) + " / " + str(len(input_files)))
         output_file = input_file[:-5] + "_reproject.tif"
+        if isfile(output_file) and not overwrite_files:
+            continue
         gdal_reproject_bhm(input_file.strip(), output_file)
 
 
-def georef_crop_all_maxar(datapath_in, datapath_out, input_csv, grid_extent_csv):
+def georef_crop_all_maxar(
+    datapath_in, datapath_out, input_csv, grid_extent_csv, overwrite_files=False
+):
     """Geo-reference the maxar png files and crop them to the BHM extents.
 
     Parameters
@@ -68,18 +72,23 @@ def georef_crop_all_maxar(datapath_in, datapath_out, input_csv, grid_extent_csv)
         lrx = min(row.right.values[0], row_alt.right.values[0])
         lry = max(row.bottom.values[0], row_alt.bottom.values[0])
         coords_b = [ulx, uly, lrx, lry]
+        filename_out = datapath_out + filecode + "_reproject.tif"
+        if isfile(filename_out) and not overwrite_files:
+            continue
         if lrx - ulx <= 0:
             print("Skipping, negative x window")
         elif uly - lry <= 0:
             print("Skipping, negative y window")
         else:
             pixels = [row.pixel_horiz.values[0], row.pixel_vert.values[0]]
-            filename_out = datapath_out + filecode + "_reproject.tif"
+
             # print(coords, filename, filename_out)
             gdal_georef_crop_maxar(filename, filename_out, coords_a, coords_b)
 
 
-def resolve_bhm_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
+def resolve_bhm_all(
+    datapath_in, datapath_out, maxar_csv, bhm_csv, overwrite_files=False
+):
     """Change the resolution of BHM images to match maxar data.
 
     Parameters
@@ -117,15 +126,17 @@ def resolve_bhm_all(datapath_in, datapath_out, maxar_csv, bhm_csv):
         except IndexError:
             continue
         coords = [ulx, uly, lrx, lry]
+        filename_out = (
+            datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
+        )
+        if isfile(filename_out) and not overwrite_files:
+            continue
         if lrx - ulx <= 0:
             print("Skipping, negative x window")
         elif uly - lry <= 0:
             print("Skipping, negative y window")
         else:
             pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
-            filename_out = (
-                datapath_out + filecode[:4] + "-BHM/BHM-" + filecode + "_resolve.tif"
-            )
             gdal_resolve_bhm(filename, filename_out, coords, pixels)
 
 
@@ -222,6 +233,7 @@ if __name__ == "__main__":
     convert_BHM = _tf_from_yn(input("Convert BHM co-ordinates to epsg:3857? [y/n] "))
     convert_maxar = _tf_from_yn(input("Crop maxar images to BHM extents? [y/n] "))
     resolve_BHM_pixels = _tf_from_yn(input("Downsample BHM to maxar size? [y/n] "))
+    overwrite_files = _tf_from_yn(input("Re-run already processed files? [y/n] "))
 
     # check if subset is False
     if not use_subset:
@@ -245,7 +257,7 @@ if __name__ == "__main__":
 
     if convert_BHM:
         list_files.list_BHM_files(BHM_init_path, listfiles_path, BHM_filename)
-        reproject_all_bhm(listfiles_path + BHM_filename)
+        reproject_all_bhm(listfiles_path + BHM_filename, overwrite_files)
 
     if use_subset:
         BHM_filename = "BHM_subset_reproj_list.txt"
@@ -285,6 +297,7 @@ if __name__ == "__main__":
             datapath_out,
             csvs_path + BHM_csv,
             maxar_extent_file,
+            overwrite_files,
         )
 
     if use_subset:
@@ -306,6 +319,7 @@ if __name__ == "__main__":
             BHM_init_path,
             csvs_path + maxar_csv,
             csvs_path + BHM_csv,
+            overwrite_files,
         )
 
     if use_subset:
