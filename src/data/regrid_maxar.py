@@ -297,8 +297,7 @@ if __name__ == "__main__":
     list_files.list_maxar_files(datapath_out, listfiles_path, maxar_filename)
 
     height_model_file_edges.write_csv(
-        listfiles_path + maxar_filename,
-        csvs_path + maxar_csv,
+        listfiles_path + maxar_filename, csvs_path + maxar_csv, bhm=False
     )
 
     if resolve_BHM_pixels:

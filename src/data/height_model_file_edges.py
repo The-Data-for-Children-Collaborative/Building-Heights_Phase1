@@ -17,7 +17,7 @@ import sys
 ###   end of user information   ###
 
 
-def write_csv(input_file, output_file):
+def write_csv(input_file, output_file, bhm=True):
 
     # read in file list from input file
     with open(input_file, "r") as f:
@@ -45,10 +45,14 @@ def write_csv(input_file, output_file):
         min_value_list.append(np.nanmin(file_array))
         max_value_list.append(np.nanmax(file_array))
         nan_list.append(int(file_array.isnull().sum()))
-        file_name_list.append(
-            file[file.find(start := "BHM-") + len(start) : file.find(".tif")]
-        )
-        print(file, " data extracted")
+        file_abbrv = file.split("/")[-1].strip()
+        if bhm:
+            file_name_list.append(
+                file[file.find(start := "BHM-") + len(start) : file.find(".tif")]
+            )
+        else:
+            file_name_list.append(file_abbrv)
+        print(file_abbrv, ": data extracted")
 
     # write to dataframe and save as csv file
     hm_BH_df = pd.DataFrame(
@@ -62,7 +66,7 @@ def write_csv(input_file, output_file):
             "max_value": max_value_list,
             "pixel_horiz": pixel_x_list,
             "pixel_vert": pixel_y_list,
-            "number_of_nan":nan_list,
+            "number_of_nan": nan_list,
         }
     )
 
