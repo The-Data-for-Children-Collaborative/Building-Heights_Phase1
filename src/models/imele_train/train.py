@@ -341,8 +341,8 @@ if __name__ == '__main__':
     # We construct the prefix were the output files will be saved
 
     save_model = args.prefix + '/' + args.data + '_'
-    if not os.path.exists(args.data):
-        os.makedirs(args.data)
+    if not os.path.exists(args.prefix):
+        os.makedirs(args.prefix)
 
     # Finally, we are ready to perform the training
 
