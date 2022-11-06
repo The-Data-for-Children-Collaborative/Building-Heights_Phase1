@@ -170,12 +170,11 @@ def main(use_cuda, args):
     for epoch in range(args.start_epoch, args.epochs):
 
         adjust_learning_rate(optimizer, epoch)
-        train(train_loader, model, optimizer, epoch, use_cuda)
+        #train(train_loader, model, optimizer, epoch, use_cuda)
 
-        out_name = save_model+str(epoch)+'.pth.tar'
+        out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
-        print(modelname)
-
+        print('Snapshot saved to: {}'.format(modelname))
 
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
@@ -233,7 +232,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
 
         output = model(image)
 
-        # We calculated the the loss function
+        # We calculate the loss function
 
         depth_grad = get_gradient(depth)
         output_grad = get_gradient(output)
@@ -316,15 +315,22 @@ def save_checkpoint(state, filename='test.pth.tar'):
 
 if __name__ == '__main__':
 
-    # At first we construct a command line parser...
+    # At first, we construct a command line parser...
 
     parser = argparse.ArgumentParser(description='')
+
+    # Arguments concerning the training, hyperparameters, etc...
+
     parser.add_argument('--epochs', default=100, type=int, help='number of total epochs to run')
     parser.add_argument('--start_epoch', default=0, type=int, help='manual epoch number (useful on restarts)')
     parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
-    parser.add_argument('--data', default='adjust')
+
+    # Arguments concerning input and ouput data location
+
+    parser.add_argument('--prefix', default='trained_models')
+    parser.add_argument('--data', default='model')
     parser.add_argument('--csv', default='')
     parser.add_argument('--model', default='')
 
@@ -334,7 +340,7 @@ if __name__ == '__main__':
 
     # We construct the prefix were the output files will be saved
 
-    save_model = args.data + '/' + args.data + '_model_'
+    save_model = args.prefix + '/' + args.data + '_'
     if not os.path.exists(args.data):
         os.makedirs(args.data)
 

@@ -6,7 +6,7 @@ The approach and large parts of the code are based on https://github.com/speed89
 
 Run the training routines with the following command
 
-    python train.py --csv list.csv
+    python train.py --csv list.csv --prefix /data/trained_models/hires/ --data hires01
 
 after having written in `list.csv` a series of pairs (file containing a satellite image,file containing a height reference). 
 
