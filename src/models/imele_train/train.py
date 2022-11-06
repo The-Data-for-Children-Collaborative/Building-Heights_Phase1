@@ -170,7 +170,7 @@ def main(use_cuda, args):
     for epoch in range(args.start_epoch, args.epochs):
 
         adjust_learning_rate(optimizer, epoch)
-        #train(train_loader, model, optimizer, epoch, use_cuda)
+        train(train_loader, model, optimizer, epoch, use_cuda)
 
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
