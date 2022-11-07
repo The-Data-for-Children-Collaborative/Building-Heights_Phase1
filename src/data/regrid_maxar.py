@@ -7,6 +7,7 @@ import pandas as pd
 import height_model_file_edges
 import list_files
 from os.path import expanduser, isfile
+import subprocess
 
 
 def reproject_all_bhm(input_file_list, overwrite_files=False):
@@ -336,3 +337,8 @@ if __name__ == "__main__":
         listfiles_path + BHM_filename,
         csvs_path + BHM_csv,
     )
+
+    # change permissions
+    folders_change = [BHM_init_path, datapath_out, csvs_path, listfiles_path]
+    for folder in folders_change:
+        subprocess.call(["chmod", "-R", "777", folder])
