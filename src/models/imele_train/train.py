@@ -269,7 +269,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
                   .format(epoch, i, len(train_loader), batch_time=batch_time, loss=losses)
 
         print(message)
-        log_file.write(message)
+        log_file.write(message + '\n')
 
 def adjust_learning_rate(optimizer, epoch):
     '''
@@ -363,3 +363,4 @@ if __name__ == '__main__':
     # Final cleanup
 
     log_file.close()
+    print('Log written to: {}'.format(log_file_path))
