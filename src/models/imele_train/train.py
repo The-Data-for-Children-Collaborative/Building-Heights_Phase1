@@ -170,7 +170,9 @@ def main(use_cuda, args):
     for epoch in range(args.start_epoch, args.epochs):
 
         adjust_learning_rate(optimizer, epoch)
-        train(train_loader, model, optimizer, epoch, use_cuda)
+
+        if(args.debug == False):
+            train(train_loader, model, optimizer, epoch, use_cuda)
 
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
@@ -261,11 +263,13 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
 
         batchSize = depth.size(0)
 
-        print('Epoch: [{0}][{1}/{2}]\t'
-              'Time {batch_time.val:.3f} ({batch_time.sum:.3f})\t'
-              'Loss {loss.val:.4f} ({loss.avg:.4f})'
-              .format(epoch, i, len(train_loader), batch_time=batch_time, loss=losses))
+        message = 'Epoch: [{0}][{1}/{2}]\t' \
+                  'Time {batch_time.val:.3f} ({batch_time.sum:.3f})\t' \
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})' \
+                  .format(epoch, i, len(train_loader), batch_time=batch_time, loss=losses)
 
+        print(message)
+        log_file.write(message)
 
 def adjust_learning_rate(optimizer, epoch):
     '''
@@ -334,6 +338,10 @@ if __name__ == '__main__':
     parser.add_argument('--csv', default='')
     parser.add_argument('--model', default='')
 
+    # Arguments used only for debugging purposes
+
+    parser.add_argument('--debug', action="store_true")
+
     # ...end we actually use it to parse the command line
 
     args = parser.parse_args()
@@ -341,9 +349,17 @@ if __name__ == '__main__':
     # We construct the prefix were the output files will be saved
 
     save_model = args.prefix + '/' + args.data + '_'
+    log_file_path = args.prefix + '/' + args.data + '.log'
+
     if not os.path.exists(args.prefix):
         os.makedirs(args.prefix)
+
+    log_file = open(log_file_path, "w")
 
     # Finally, we are ready to perform the training
 
     main(torch.cuda.is_available(), args)
+
+    # Final cleanup
+
+    log_file.close()
