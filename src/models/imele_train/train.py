@@ -136,7 +136,7 @@ def main(use_cuda, args):
     # Batches do not make a big difference when running on CPU, but they
     # speed up the process a lot when running on GPU/CUDA.
 
-    batch_size = 2
+    batch_size = 1
 
     if args.start_epoch != 0:
 
@@ -188,7 +188,7 @@ def main(use_cuda, args):
         # If a test set has been provided, we evaluate the loss there every epoch
 
         if args.test != None:
-            loss_on_test_set(test_loader, model, use_cuda)
+            loss_on_test_set(test_loader, model, epoch, use_cuda)
 
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
@@ -329,7 +329,7 @@ def save_checkpoint(state, filename='test.pth.tar'):
     return filename
 
 
-def loss_on_test_set(test_loader, model, use_cuda):
+def loss_on_test_set(test_loader, model, epoch, use_cuda):
     '''
         Given a (trained or partially trained) model, evaluates the loss on the training set.
 
@@ -344,6 +344,8 @@ def loss_on_test_set(test_loader, model, use_cuda):
         get_gradient = sobel.Sobel().cuda()
     else:
         get_gradient = sobel.Sobel()
+
+    all_losses = []
 
     for i, sample_batched in enumerate(test_loader):
 
@@ -386,7 +388,10 @@ def loss_on_test_set(test_loader, model, use_cuda):
         loss_normal = torch.abs(1 - cos(output_normal, depth_normal)).mean()
         loss = loss_depth + loss_normal + (loss_dx + loss_dy)
 
-        print('Here the loss is: {}'.format(loss))
+        all_losses.append(loss)
+
+    average = sum(all_losses)/sum(all_losses)
+    print('Average loss over the test set at epoch {} is: {}'.format(epoch, average))
 
 
 if __name__ == '__main__':
