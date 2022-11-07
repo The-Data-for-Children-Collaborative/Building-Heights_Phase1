@@ -28,6 +28,7 @@ def reproject_all_bhm(input_file_list, overwrite_files=False):
         if isfile(output_file) and not overwrite_files:
             continue
         gdal_reproject_bhm(input_file.strip(), output_file)
+        subprocess.call(["chmod", "770", output_file])
 
 
 def georef_crop_all_maxar(
@@ -85,6 +86,7 @@ def georef_crop_all_maxar(
 
             # print(coords, filename, filename_out)
             gdal_georef_crop_maxar(filename, filename_out, coords_a, coords_b)
+            subprocess.call(["chmod", "770", filename_out])
 
 
 def resolve_bhm_all(
@@ -139,6 +141,7 @@ def resolve_bhm_all(
         else:
             pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
             gdal_resolve_bhm(filename, filename_out, coords, pixels)
+            subprocess.call(["chmod", "770", filename_out])
 
 
 def gdal_reproject_bhm(input_filename, output_filename):
@@ -337,8 +340,3 @@ if __name__ == "__main__":
         listfiles_path + BHM_filename,
         csvs_path + BHM_csv,
     )
-
-    # change permissions
-    folders_change = [BHM_init_path, datapath_out, csvs_path, listfiles_path]
-    for folder in folders_change:
-        subprocess.call(["chmod", "-R", "777", folder])
