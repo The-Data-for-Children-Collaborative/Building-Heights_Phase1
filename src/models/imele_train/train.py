@@ -163,6 +163,13 @@ def main(use_cuda, args):
 
     train_loader = get_training_data(batch_size, args.csv)
 
+    # Optionally, we also load the test dataset
+
+    if args.test != None:
+        test_loader = get_training_data(batch_size, args.test)
+    else:
+        test_loader = None
+
     # We perform the actual training, for each epoch we calculate
     # the current adjusted learning rate, then we perform the actual
     # training, finally we save the current weights.
@@ -178,12 +185,17 @@ def main(use_cuda, args):
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
         print('Snapshot saved to: {}'.format(modelname))
 
+        # If a test set has been provided, we evaluate the loss there every epoch
+
+        if args.test != None:
+            loss_on_test_set(test_loader, model, use_cuda)
+
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
     '''
         Performs an epoch of training.
 
-        Arguments: train_loader, a torch.utils.data.DataLoader object helping us loading the pairs
+        Arguments: train_loader, a torch.utils.data.DataLoader object helping us loading the training pairs
                    model, an object containing our model
                    optimizer, our optimizer, a torch.optim.Optimizer object
                    epoch, an integer, the current epoch
@@ -317,6 +329,66 @@ def save_checkpoint(state, filename='test.pth.tar'):
     return filename
 
 
+def loss_on_test_set(test_loader, model, use_cuda):
+    '''
+        Given a (trained or partially trained) model, evaluates the loss on the training set.
+
+        Arguments: test_loader, a torch.utils.data.DataLoader object helping us loading the test pairs
+                   model, an object containing our model
+                   use_cuda, a bool specifying whether we are using CUDA or not
+    '''
+
+    cos = nn.CosineSimilarity(dim=1, eps=0)
+
+    if use_cuda == True:
+        get_gradient = sobel.Sobel().cuda()
+    else:
+        get_gradient = sobel.Sobel()
+
+    for i, sample_batched in enumerate(test_loader):
+
+        image, depth = sample_batched['image'], sample_batched['depth']
+
+        # Not sure if this resizing should go here, but it does the trick!
+        depth = torch.nn.functional.interpolate(depth, size=(250, 250), mode='bilinear')
+
+        if use_cuda == True:
+            depth = depth.cuda(non_blocking=True)
+            image = image.cuda()
+
+        image = torch.autograd.Variable(image)
+        depth = torch.autograd.Variable(depth)
+
+        ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
+
+        if use_cuda == True:
+            ones = ones.cuda()
+
+        ones = torch.autograd.Variable(ones)
+
+        # The model is evaluated on the current feature sample
+
+        output = model(image)
+
+        # We calculate the loss function
+
+        depth_grad = get_gradient(depth)
+        output_grad = get_gradient(output)
+        depth_grad_dx = depth_grad[:, 0, :, :].contiguous().view_as(depth)
+        depth_grad_dy = depth_grad[:, 1, :, :].contiguous().view_as(depth)
+        output_grad_dx = output_grad[:, 0, :, :].contiguous().view_as(depth)
+        output_grad_dy = output_grad[:, 1, :, :].contiguous().view_as(depth)
+        depth_normal = torch.cat((-depth_grad_dx, -depth_grad_dy, ones), 1)
+        output_normal = torch.cat((-output_grad_dx, -output_grad_dy, ones), 1)
+        loss_depth = torch.log(torch.abs(output - depth) + 0.5).mean()
+        loss_dx = torch.log(torch.abs(output_grad_dx - depth_grad_dx) + 0.5).mean()
+        loss_dy = torch.log(torch.abs(output_grad_dy - depth_grad_dy) + 0.5).mean()
+        loss_normal = torch.abs(1 - cos(output_normal, depth_normal)).mean()
+        loss = loss_depth + loss_normal + (loss_dx + loss_dy)
+
+        print('Here the loss is: {}'.format(loss))
+
+
 if __name__ == '__main__':
 
     # At first, we construct a command line parser...
@@ -336,6 +408,7 @@ if __name__ == '__main__':
     parser.add_argument('--prefix', default='trained_models')
     parser.add_argument('--data', default='model')
     parser.add_argument('--csv', default='')
+    parser.add_argument('--test', default=None)
     parser.add_argument('--model', default='')
 
     # Arguments used only for debugging purposes
