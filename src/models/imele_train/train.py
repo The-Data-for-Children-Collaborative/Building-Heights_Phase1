@@ -181,14 +181,15 @@ def main(use_cuda, args):
         if(args.debug == False):
             train(train_loader, model, optimizer, epoch, use_cuda)
 
-        out_name = save_model + str(epoch) + '.pth.tar'
-        modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
-        print('Snapshot saved to: {}'.format(modelname))
-
         # If a test set has been provided, we evaluate the loss there every epoch
 
         if args.test != None:
             loss_on_test_set(test_loader, model, epoch, use_cuda)
+
+        out_name = save_model + str(epoch) + '.pth.tar'
+        modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
+        print('Snapshot saved to: {}'.format(modelname))
+
 
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
@@ -283,51 +284,6 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         print(message)
         log_file.write(message + '\n')
 
-def adjust_learning_rate(optimizer, epoch):
-    '''
-        Adjusting the learning ratio, as a function of the current epoch
-
-        Arguments: optimizer, a torch.optim.Optimizer object
-                   epoch, an integer specifying the current epoch
-    '''
-
-    lr = args.lr * (0.9 ** (epoch // 5))
-
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
-
-class AverageMeter(object):
-    '''
-        A simple class implementing a counter to calculate running averages.
-    '''
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
-def save_checkpoint(state, filename='test.pth.tar'):
-    '''
-        Simply saves the current weights to disk
-
-        Arguments: state, a dictionary obtained from model.state_dict()
-                   filename, a string specifying the path where to save the checkpoint
-    '''
-
-    torch.save(state, filename)
-    return filename
-
 
 def loss_on_test_set(test_loader, model, epoch, use_cuda):
     '''
@@ -335,8 +291,13 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
 
         Arguments: test_loader, a torch.utils.data.DataLoader object helping us loading the test pairs
                    model, an object containing our model
+                   epoch, the current epoch
                    use_cuda, a bool specifying whether we are using CUDA or not
     '''
+
+    # The model is set to training mode
+
+    model.train()
 
     cos = nn.CosineSimilarity(dim=1, eps=0)
 
@@ -388,10 +349,59 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
         loss_normal = torch.abs(1 - cos(output_normal, depth_normal)).mean()
         loss = loss_depth + loss_normal + (loss_dx + loss_dy)
 
-        all_losses.append(loss)
+        all_losses.append(loss.data.cpu().item())
 
-    average = sum(all_losses)/sum(all_losses)
+    average = sum(all_losses) / len(all_losses)
+
     print('Average loss over the test set at epoch {} is: {}'.format(epoch, average))
+    log_file.write('Average loss over the test set at epoch {} is: {}\n'.format(epoch, average))
+
+
+def adjust_learning_rate(optimizer, epoch):
+    '''
+        Adjusting the learning ratio, as a function of the current epoch
+
+        Arguments: optimizer, a torch.optim.Optimizer object
+                   epoch, an integer specifying the current epoch
+    '''
+
+    lr = args.lr * (0.9 ** (epoch // 5))
+
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+
+class AverageMeter(object):
+    '''
+        A simple class implementing a counter to calculate running averages.
+    '''
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+
+def save_checkpoint(state, filename='test.pth.tar'):
+    '''
+        Simply saves the current weights to disk
+
+        Arguments: state, a dictionary obtained from model.state_dict()
+                   filename, a string specifying the path where to save the checkpoint
+    '''
+
+    torch.save(state, filename)
+    return filename
+
 
 
 if __name__ == '__main__':
