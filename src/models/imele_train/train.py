@@ -232,7 +232,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
 
-        ones = torch.ones(depth.size(0), 1, depth.size(2),depth.size(3)).float()
+        ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
 
         if use_cuda == True:
             ones = ones.cuda()
@@ -289,7 +289,7 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
     '''
         Given a (trained or partially trained) model, evaluates the loss on the training set.
 
-        Arguments: test_loader, a torch.utils.data.DataLoader object helping us loading the test pairs
+        Arguments: test_loader, a torch.utils.data.DataLoader object helping us to load the test pairs
                    model, an object containing our model
                    epoch, the current epoch
                    use_cuda, a bool specifying whether we are using CUDA or not
