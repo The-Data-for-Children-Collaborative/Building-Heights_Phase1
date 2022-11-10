@@ -35,10 +35,7 @@ class depthDataset(Dataset):
         depth_name = self.frame.loc[idx, 1]
 
         image = Image.open(image_name)
-
-        depth = cv2.imread(depth_name, -1)
-        depth = (depth*1000).astype(np.uint16)
-        depth = Image.fromarray(depth)
+        depth = Image.open(depth_name)
 
         sample = {'image': image, 'depth': depth}
 
