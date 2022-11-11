@@ -1,20 +1,25 @@
-#### taglia le immagini in quadratini
 import numpy as np
 from PIL import Image
 from numpy import asarray
 import os
 import pandas as pd
+import sys
+
+
+
+
+#check that number of arguments
+#if sys.argc != 5:
+#    print('Error! We want 5 args')
+
+directory = sys.argv[1]
+new_directory = sys.argv[2]
+sliced_dir = sys.argv[3]
+Rx = int(sys.argv[4])
+Ry = int(sys.argv[5])
 
 height = 500  #height of cropped image
 width = 500  #weight of cropped image
-Rx = 200  # overlap of cropping x-axis
-Ry = 200  # overlap of cropping y-axis
-
-# COLORED CROPPING
-
-directory = 'maxar_tiles'
-new_directory = 'converted_maxar'
-sliced_dir = 'maxar_sliced'
 
 
 #check if the directory exists already
@@ -53,9 +58,9 @@ for file in os.scandir(directory):
             #width = 500
             startx=0
             starty =0
-            y,x,c = numpydata.shape
-            Rx = 200  # correction of cropping  x-axis
-            Ry = 200  # correction of cropping y-axis
+            y,x = numpydata.shape
+            #Rx = 200  # correction of cropping  x-axis
+            #Ry = 200  # correction of cropping y-axis
 
             print('File :', file_name, ' Size :', numpydata.shape)
 
@@ -69,7 +74,7 @@ for file in os.scandir(directory):
 
                 while (startx+width < numpydata.shape[1]):
                     print('cropping on x...')
-                    cropped = numpydata[starty:starty+height, startx:startx+width, :]
+                    cropped = numpydata[starty:starty+height, startx:startx+width]
 
                     #saves the cropped array in sliced_dir
 
@@ -85,11 +90,11 @@ for file in os.scandir(directory):
                     # saves the last block of the row
                     if startx + width >= numpydata.shape[1] -1:
                         startx = numpydata.shape[1] - 1
-                        last_block = numpydata[starty: starty + height, startx - width : startx, :]
+                        last_block = numpydata[starty: starty + height, startx - width : startx]
                         path_join = os.path.join(sliced_dir, file_name + '_y' + str(starty) + 'x' + str(startx-width) + '.npy')
                         np.save(path_join , last_block, allow_pickle=True)
                         counter +=1
-                        print('Last block of the row x: ', path_join , 'Shape: ', last_block.shape, 'Coordinates', starty, startx)
+
 
 
                 starty = starty + height - Ry
@@ -100,18 +105,17 @@ for file in os.scandir(directory):
             # starty + height >= numpy.datashape[0]  <-- I am at the bottom of my image
             starty = numpydata.shape[0] - 1
             while (startx+width < numpydata.shape[1]) and (numpydata.shape[0] >= height):
-                cropped = numpydata[starty - height: starty, startx : startx + width, :]
+                cropped = numpydata[starty - height: starty, startx : startx + width]
                 path_join = os.path.join(sliced_dir, file_name + '_y' + str(starty-height) + 'x' + str(startx) + '.npy')
                 np.save(path_join , last_block)
                 counter +=1
 
-                print('Crop the bottom! ...', starty, startx)
                 startx = startx + width - Rx
 
                 # saves the last block of the row
                 if startx + width >= numpydata.shape[1] -1:
                     startx = numpydata.shape[1] - 1
-                    last_block = numpydata[starty: starty + height, startx - width : startx, :]
+                    last_block = numpydata[starty: starty + height, startx - width : startx]
                     path_join = os.path.join(sliced_dir, file_name + '_y' + str(starty) + 'x' + str(startx-width) + '.npy')
                     np.save(path_join , last_block, allow_pickle=True)
                     counter +=1
@@ -120,4 +124,4 @@ for file in os.scandir(directory):
 
 
 
-            print('Number of cropped photos from the current image: ', counter ,'\n \n')
+            print('Number of cropped photos from the current image: ', counter )
