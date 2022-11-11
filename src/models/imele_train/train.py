@@ -114,13 +114,18 @@ def define_model(is_resnet, is_densenet, is_senet):
     return model
 
 
-def main(use_cuda, args):
+def train_main(use_cuda, args):
     '''
         The main function performing the training
 
         Argument: use_cuda, a bool specifying whether CUDA is available
                   args, the command line arguments, as parsed by a argparse.ArgumentParser object
     '''
+
+    if(os.path.isfile(args.csv) == False):
+        print('The specified CSV file ({}) does not exist. Quitting.'.format(args.csv))
+        log_file.write('The specified CSV file ({}) does not exist. Quitting.\n'.format(args.csv))
+        return
 
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
 
@@ -438,7 +443,7 @@ if __name__ == '__main__':
 
     # Finally, we are ready to perform the training
 
-    main(torch.cuda.is_available(), args)
+    train_main(torch.cuda.is_available(), args)
 
     # Final cleanup
 
