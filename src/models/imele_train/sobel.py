@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from torchvision.utils import save_image
 
 class Sobel(nn.Module):
     def __init__(self):
+
         super(Sobel, self).__init__()
         self.edge_conv = nn.Conv2d(1, 2, kernel_size=3, stride=1, padding=1, bias=False)
         edge_kx = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
@@ -18,12 +18,8 @@ class Sobel(nn.Module):
             param.requires_grad = False
 
     def forward(self, x):
-        out = self.edge_conv(x) 
+
+        out = self.edge_conv(x)
         out = out.contiguous().view(-1, 2, x.size(2), x.size(3))
-        # x = out[1,:]
-        # save_image(x[0], 'img1.png')
-        # save_image(x[1], 'img2.png')
-        #i1 = x[0].cpu().detach().numpy()
-        #i2 = x[1].cpu().detach().numpy()
 
         return out

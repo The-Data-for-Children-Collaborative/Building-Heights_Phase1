@@ -1,18 +1,17 @@
 import torch
 import torch.nn.parallel
 from torch.utils.data import Dataset, DataLoader
-
 import torchvision
 
 import pandas as pd
 import numpy as np
-import cv2
 from PIL import Image
 import os
 import argparse
 
 from models import modules, net, resnet, densenet, senet
 from transforms import ToTensor, Normalize
+
 
 class depthDataset(Dataset):
     '''
@@ -117,6 +116,7 @@ def define_model(is_resnet, is_densenet, is_senet):
 
     return model
 
+
 def eval_main(csv_filename, model_filename):
     '''
         The main function.
@@ -193,7 +193,7 @@ def eval_main(csv_filename, model_filename):
         print('Output #{}, shape (after resampling) is {}'.format(i,output.shape))
 
         # The output is saved in numpy format
-        # TODO: this works only on the first element of a batch
+        # FIXME: this works only on the first element of a batch, so we need to work with a batch size of 1
 
         np.save(sample_batched['output_name'][0], output.detach().numpy()[0,0], allow_pickle=False)
 

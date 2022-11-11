@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -9,11 +6,11 @@ import torch.optim
 from torch.utils.data import Dataset, DataLoader
 import torchvision
 
+import numpy as np
+import pandas as pd
 from PIL import Image
-import cv2
 
 import os
-import sys
 import time
 import argparse
 
@@ -186,7 +183,6 @@ def main(use_cuda, args):
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
         print('Snapshot saved to: {}'.format(modelname))
-
 
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
@@ -398,7 +394,6 @@ def save_checkpoint(state, filename='test.pth.tar'):
 
     torch.save(state, filename)
     return filename
-
 
 
 if __name__ == '__main__':
