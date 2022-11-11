@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -9,11 +6,11 @@ import torch.optim
 from torch.utils.data import Dataset, DataLoader
 import torchvision
 
+import numpy as np
+import pandas as pd
 from PIL import Image
-import cv2
 
 import os
-import sys
 import time
 import argparse
 
@@ -35,10 +32,7 @@ class depthDataset(Dataset):
         depth_name = self.frame.loc[idx, 1]
 
         image = Image.open(image_name)
-
-        depth = cv2.imread(depth_name, -1)
-        depth = (depth*1000).astype(np.uint16)
-        depth = Image.fromarray(depth)
+        depth = Image.open(depth_name)
 
         sample = {'image': image, 'depth': depth}
 
@@ -120,13 +114,18 @@ def define_model(is_resnet, is_densenet, is_senet):
     return model
 
 
-def main(use_cuda, args):
+def train_main(use_cuda, args):
     '''
         The main function performing the training
 
         Argument: use_cuda, a bool specifying whether CUDA is available
                   args, the command line arguments, as parsed by a argparse.ArgumentParser object
     '''
+
+    if(os.path.isfile(args.csv) == False):
+        print('The specified CSV file ({}) does not exist. Quitting.'.format(args.csv))
+        log_file.write('The specified CSV file ({}) does not exist. Quitting.\n'.format(args.csv))
+        return
 
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
 
@@ -189,7 +188,6 @@ def main(use_cuda, args):
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
         print('Snapshot saved to: {}'.format(modelname))
-
 
 
 def train(train_loader, model, optimizer, epoch, use_cuda):
@@ -403,7 +401,6 @@ def save_checkpoint(state, filename='test.pth.tar'):
     return filename
 
 
-
 if __name__ == '__main__':
 
     # At first, we construct a command line parser...
@@ -446,7 +443,7 @@ if __name__ == '__main__':
 
     # Finally, we are ready to perform the training
 
-    main(torch.cuda.is_available(), args)
+    train_main(torch.cuda.is_available(), args)
 
     # Final cleanup
 

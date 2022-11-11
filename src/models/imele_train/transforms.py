@@ -21,10 +21,6 @@ class ToTensor(object):
         image = self.to_tensor(image)/255
         depth = self.to_tensor(depth)/100000
 
-        
-        
-       
-
         return {'image': image, 'depth': depth}
 
     def to_tensor(self, pic):
@@ -46,16 +42,12 @@ class ToTensor(object):
         else:
             nchannel = len(pic.mode)
 
-       
-
         img = img.view(pic.size[1], pic.size[0], nchannel)
         # put it from HWC to CHW format
         # yikes, this transpose takes 80% of the loading time/CPU
         img = img.transpose(0, 1).transpose(0, 2).contiguous()
 
-   
         return img.float()
-
 
 
 class Normalize(object):
@@ -91,4 +83,5 @@ class Normalize(object):
         # TODO: make efficient
         for t, m, s in zip(tensor, mean, std):
             t.sub_(m).div_(s)
+
         return tensor
