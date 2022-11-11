@@ -39,7 +39,11 @@ list_of_files_maxar = sorted(filter( lambda x: os.path.isfile(os.path.join(maxar
 list_of_files_BHM = sorted( filter( lambda x: os.path.isfile(os.path.join(BHM, x)),
                         os.listdir(BHM) ) )
 
-df = pd.DataFrame({"FILE MAXAR" : list_of_files_maxar, "FILE BHM" : list_of_files_BHM})
-path = destination + '/pairings.csv'
-df.to_csv( path , index=False)
-print(df)
+if len(list_of_files_maxar) != len(list_of_files_BHM):
+    print("Error: the lists have different lengths")
+
+else:
+    df = pd.DataFrame({"FILE MAXAR" : list_of_files_maxar, "FILE BHM" : list_of_files_BHM})
+    path = destination + '/pairings.csv'
+    df.to_csv( path , index=False)
+    print(df)
