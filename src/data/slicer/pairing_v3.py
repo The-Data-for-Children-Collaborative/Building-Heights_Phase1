@@ -17,7 +17,6 @@ import sys
 maxar = sys.argv[1]
 BHM = sys.argv[2]
 destination = sys.argv[3]
-
 ##### RECORDS THE PAIRINGS OF DATA (unsliced) ####
 
 #folder_1 = 'maxar_tiles'
