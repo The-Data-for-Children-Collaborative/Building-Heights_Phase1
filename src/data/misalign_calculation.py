@@ -11,18 +11,21 @@ from fnmatch import fnmatch
 
 ### user information: ###
 
-# The user should write: misalignment(folder_path,output_file) 
+# The user should write: misalignment(BHM_folder_path, Maxar_folder_path, output_file) 
 # and add:
-# folder_path = the directory of the folder to work with.
-# output_file = the file name (with the directory) of the csv to be saved.
+# BHM_folder_path = the directory of the folder of the Lidar files to work with.
+# Maxar_folder_path = the directory of the folder of the Maxar files to work with.
+# output_file = the directory and file name to save the output csv with the results.
 
 ###   end of user information   ###
 
 
-def misalignment(folder_path,output_file):
+def misalignment(BHM_folder_path,Maxar_folder_path,output_file):
     #create the lists
     list_path = []
+    list_path1 = []
     files = []
+    file1s = []
     file_names = []
     size_maxars = []
     size_lidars = []
@@ -36,22 +39,28 @@ def misalignment(folder_path,output_file):
     pixel_mis_ys = []
     
   # loop to find the pairs of files with the same reference numbers  
-    for dirname, _, filenames in os.walk(folder_path):
+    for dirname, _, filenames in os.walk(BHM_folder_path):
         for filename in filenames: 
             list_path.append(os.path.join(dirname, filename))
             files.append(filename)
     BHM = []
-    no_BHM = []
     for i in files:
             if fnmatch(i, "*BHM*"):
                 BHM.append(i)
-            else:
-                no_BHM.append(i)
-    for i, j in zip(BHM, no_BHM):
+           # else:
+            #    no_BHM.append(i)
+    
+    for dirname1, _, filename1s in os.walk(Maxar_folder_path):
+        for filename1 in filename1s: 
+            list_path1.append(os.path.join(dirname1, filename1))
+            file1s.append(filename1)
+   # no_BHM = []
+    for i, j in zip(BHM, file1s):
         if i[4:8] == j[:4]: 
             if i[9:12] == j[5:8]:
-                first_arg = os.path.join(folder_path, i)
-                second_arg = os.path.join(folder_path, j)
+                
+                first_arg = os.path.join(BHM_folder_path, i)
+                second_arg = os.path.join(Maxar_folder_path, j)
                 first, sec = gdal.Open(first_arg), gdal.Open(second_arg)              
      
     # Opening the data (Maxar image and Lidar raster)
