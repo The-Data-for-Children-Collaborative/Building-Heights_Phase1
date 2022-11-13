@@ -26,10 +26,10 @@ Rx = int(sys.argv[2])
 Ry = int(sys.argv[3])
 
 
-directory_maxar = destination + `/maxar`
-directory_bhm = destination + `/bhm`
-sliced_dir_maxar = destination + `/sliced_maxar`
-sliced_dir_bhm = destination + `/sliced_bhm`
+directory_maxar = destination + '/maxar'
+directory_bhm = destination + '/bhm'
+sliced_dir_maxar = destination + '/sliced_maxar'
+sliced_dir_bhm = destination + '/sliced_bhm'
 
 height = 500  #height of cropped image
 width = 500  #weight of cropped image
