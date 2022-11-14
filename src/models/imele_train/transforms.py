@@ -18,36 +18,46 @@ class ToTensor(object):
             Tensor: Converted image.
         """
 
-        image = self.to_tensor(image)/255
-        depth = self.to_tensor(depth)/100000
+        image = self.to_tensor(image, "image")/255
+        depth = self.to_tensor(depth, "depth")/100000
 
         return {'image': image, 'depth': depth}
 
-    def to_tensor(self, pic):
-
-        # handle PIL Image
-        if pic.mode == 'I':
-            img = torch.from_numpy(np.array(pic, np.int32, copy=False))
-        elif pic.mode == 'I;16':
-            img = torch.from_numpy(np.array(pic, np.int16, copy=False))
-        elif pic.mode == 'F':
-            img = torch.from_numpy(np.array(pic, np.int32, copy=False))            
+    def to_tensor(self, pic, pic_type):
+        
+        if isinstance(pic, np.ndarray):
+            if pic_type == "image":
+                # Handle numpy tensor, removing the opacity channel
+                img = torch.from_numpy(pic[:, :, (0, 1, 2)])
+                nchannel = 3
+            else:
+                img = torch.from_numpy(pic)
+                nchannel = 1
         else:
-            img = torch.ByteTensor(
-                torch.ByteStorage.from_buffer(pic.tobytes()))
-        # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
-        if pic.mode == 'YCbCr':
-            nchannel = 3
-        elif pic.mode == 'I;16':
-            nchannel = 1
-        else:
-            nchannel = len(pic.mode)
+            # handle PIL Image
+            if pic.mode == 'I':
+                img = torch.from_numpy(np.array(pic, np.int32, copy=False))
+            elif pic.mode == 'I;16':
+                img = torch.from_numpy(np.array(pic, np.int16, copy=False))
+            elif pic.mode == 'F':
+                img = torch.from_numpy(np.array(pic, np.int32, copy=False))            
+            else:
+                img = torch.ByteTensor(
+                    torch.ByteStorage.from_buffer(pic.tobytes()))
+            # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
+            if pic.mode == 'YCbCr':
+                nchannel = 3
+            elif pic.mode == 'I;16':
+                nchannel = 1
+            else:
+                nchannel = len(pic.mode)
 
-        img = img.view(pic.size[1], pic.size[0], nchannel)
+            img = img.view(pic.size[1], pic.size[0], nchannel)
 
         # put it from HWC to CHW format
         # yikes, this transpose takes 80% of the loading time/CPU
-        img = img.transpose(0, 1).transpose(0, 2).contiguous()
+        if pic_type == "image":
+            img = img.transpose(0, 1).transpose(0, 2).contiguous()
 
         return img.float()
 

@@ -32,21 +32,19 @@ class depthDataset(Dataset):
         depth_name = self.frame.loc[idx, 1]
         
         # convert numpy arrays to tifs
-        image_tmp = Image.fromarray(np.load(image_name))
-        depth_tmp = Image.fromarray(np.load(depth_name))
-        image_name = image_name.replace("npy", "tif")
-        depth_name = depth_name.replace("npy", "tif")
+        _, image_extension = os.path.splitext(image_name)
+        _, depth_extension = os.path.splitext(depth_name)        
 
-        image_tmp.save(image_name)
-        depth_tmp.save(depth_name)
-        
-        # convert RGBA to RGB
-        image = Image.open(image_name)
-        background = Image.new("RGB", image.size, (255, 255, 255))
-        background.paste(image, mask = image.split()[3])
-        background.save(image_name) 
-        image = Image.open(image_name)       
-        depth = Image.open(depth_name)
+        # If the extension of file is .npy we treat is as a numpy array
+        # Otherwise, we treat is an image, and Pillow will take care of it.
+        if image_extension == '.npy':
+            image = np.load(image_name)
+        else:
+            image = Image.open(image_name)
+        if depth_extension == '.npy':
+            depth = np.load(image_name)
+        else:
+            depth = Image.open(depth_name)
 
         sample = {'image': image, 'depth': depth}
 
@@ -149,7 +147,7 @@ def train_main(use_cuda, args):
     # Batches do not make a big difference when running on CPU, but they
     # speed up the process a lot when running on GPU/CUDA.
 
-    batch_size = 1
+    batch_size = args.batch_size
 
     if args.start_epoch != 0:
 
@@ -428,6 +426,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
+    parser.add_argument('--batch_size', default=1, type=int, help='batch size (default: 1)')
 
     # Arguments concerning input and ouput data location
 
@@ -463,3 +462,10 @@ if __name__ == '__main__':
 
     log_file.close()
     print('Log written to: {}'.format(log_file_path))
+
+
+
+
+
+
+
