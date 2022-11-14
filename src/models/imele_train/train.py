@@ -30,8 +30,22 @@ class depthDataset(Dataset):
 
         image_name = self.frame.loc[idx, 0]
         depth_name = self.frame.loc[idx, 1]
+        
+        # convert numpy arrays to tifs
+        image_tmp = Image.fromarray(np.load(image_name))
+        depth_tmp = Image.fromarray(np.load(depth_name))
+        image_name = image_name.replace("npy", "tif")
+        depth_name = depth_name.replace("npy", "tif")
 
+        image_tmp.save(image_name)
+        depth_tmp.save(depth_name)
+        
+        # convert RGBA to RGB
         image = Image.open(image_name)
+        background = Image.new("RGB", image.size, (255, 255, 255))
+        background.paste(image, mask = image.split()[3])
+        background.save(image_name) 
+        image = Image.open(image_name)       
         depth = Image.open(depth_name)
 
         sample = {'image': image, 'depth': depth}
