@@ -1,16 +1,45 @@
+"""
+This script has two main functions:
+
+1. It filters out BHM and maxar images based on one of two criteria, either:
+   (i) The number of pixels in the x and y directions (removes small images), or
+   (ii) The difference between the measured pixel resolution in m and the actual
+        pixel resolution
+(i) and (ii) are strongly correlated, but (i) should be preferred because it is
+more consistent in filtering out the same images from each dataset.
+
+2. It copies the files that passed the filter to a new location, and gives them
+more consistent names in the process. It breaks the images into smaller sub-folders
+and zips them up for easier transfer.
+
+Information about the files to filter and copy are contained in two csv files. These
+files are created by the height_model_file_edges.py module, which is called during
+the data pipeline process (regrid_maxar.py). Please see the
+data/processed/BHM_maxar_csv_files folder of this repository for examples of these
+files.
+
+It is expected that this script is run from somewhere with direct access to the S3
+data bucket. It will require some modifications to run from a different location.
+"""
+
 import pandas as pd
 import numpy as np
 import os
 from os.path import expanduser
 import shutil
 
-# error tolerance
-err_tol = 0.01  # tolerance for error in pixel resolution in m
-pixel_base = 0.5  # expected pixel size in m
-pixel_small = 100  # minimum pixel dimension
-chunk_size = 100  # size to break full dataset into
-filter_criterion = "pixel_dimensions"  # filter on resolution or dimensions
+###     USER INPUTS     ###
 
+# tolerance for error in pixel resolution in m: if the average pixel length
+# differs by more than err_tol from the expected value, it is filtered out
+err_tol = 0.01
+pixel_base = 0.5  # expected pixel size in m
+pixel_small = 100  # minimum pixel size in x & y directions
+chunk_size = 100  # size to break full dataset into
+# filter on resolution (pixel_resolution) or dimensions (pixel_dimensions)
+filter_criterion = "pixel_dimensions"  # dimensions always recommended
+
+### END OF USER INPUTS ###
 
 # get the home directory
 homedir = expanduser("~")
