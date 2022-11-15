@@ -166,9 +166,16 @@ def eval_main(csv_filename, model_filename):
     for key, value in state_dict.items():
         new_state_dict['module.' + key] = new_state_dict.pop(key)
 
-    new_state_dict.pop('module.E.Harm.dct')
-    new_state_dict.pop('module.E.Harm.weight')
-    new_state_dict.pop('module.E.Harm.bias')
+    # The following checks are for compatibility with both the pre-trained weights and the new ones
+
+    if 'module.E.Harm.dct' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.dct')
+
+    if 'module.E.Harm.weight' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.weight')
+
+    if 'module.E.Harm.bias' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.bias')
 
     model.load_state_dict(new_state_dict)
 

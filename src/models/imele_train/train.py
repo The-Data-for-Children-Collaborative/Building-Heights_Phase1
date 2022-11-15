@@ -11,6 +11,7 @@ import pandas as pd
 from PIL import Image
 
 import os
+import sys
 import time
 import argparse
 
@@ -30,9 +31,24 @@ class depthDataset(Dataset):
 
         image_name = self.frame.loc[idx, 0]
         depth_name = self.frame.loc[idx, 1]
+        
+        # convert numpy arrays to tifs
+        _, image_extension = os.path.splitext(image_name)
+        _, depth_extension = os.path.splitext(depth_name)        
 
-        image = Image.open(image_name)
-        depth = Image.open(depth_name)
+        # If the extension of file is .npy we treat is as a numpy array
+        # Otherwise, we treat is an image, and Pillow will take care of it.
+
+        if image_extension == '.npy':
+            image = np.load(image_name)
+        else:
+            image = Image.open(image_name)
+
+        if depth_extension == '.npy':
+            depth = np.load(depth_name)
+            depth = depth.reshape(depth.shape[0], depth.shape[1], 1)
+        else:
+            depth = Image.open(depth_name)
 
         sample = {'image': image, 'depth': depth}
 
@@ -80,7 +96,7 @@ def get_training_data(batch_size=64, csv_data=''):
     # One should check carefully num_workers and pin_memory,
     # which could be important once we use CUDA.
 
-    dataloader_training = DataLoader(transformed_training_trans, batch_size, num_workers=4, pin_memory=False)
+    dataloader_training = DataLoader(transformed_training_trans, batch_size, num_workers=0, pin_memory=False)
 
     return dataloader_training
 
@@ -135,7 +151,7 @@ def train_main(use_cuda, args):
     # Batches do not make a big difference when running on CPU, but they
     # speed up the process a lot when running on GPU/CUDA.
 
-    batch_size = 1
+    batch_size = args.batch_size
 
     if args.start_epoch != 0:
 
@@ -414,6 +430,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
+    parser.add_argument('--batch_size', default=1, type=int, help='batch size (default: 1)')
 
     # Arguments concerning input and ouput data location
 
