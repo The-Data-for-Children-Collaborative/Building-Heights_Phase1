@@ -17,7 +17,11 @@ class ToTensor(object):
         """
 
         image = self.to_tensor(image)/255
-        depth = self.to_tensor(depth)/100000
+
+        if isinstance(depth, np.ndarray):
+            depth = self.to_tensor(depth)/50
+        else:
+            depth = self.to_tensor(depth)/100000
 
         return {'image': image, 'depth': depth}
 
