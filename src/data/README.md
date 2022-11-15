@@ -7,7 +7,7 @@ Brief description of each file:
  
 * `regrid_maxar.py`: runs the full data manipulation pipeline for the maxar and BHM files: converts BHM tif files to epsg:3857 co-ordinates, geo-references maxar png files, crops maxar png files to BHM co-ordinates, downsamples BHM resolution to match maxar data 
 * `height_model_file_edges.py`: extracts pixel, co-ordinate, and height data (if applicable) from tif files
-* `list_fBHM_files.py`: makes a list of desired BHM files
-* `list_maxar_tifs.py`: makes a list of desired maxar files
+* `list_files.py`: makes a list of desired BHM or maxar files
+* `filter_files.py`: should be run only after `regrid_maxar.py` has generated the final cropped matching pairs and the corresponding csv files. Filters out "small" images (either based on the number of pixels or the average pixel resolution), copies and zips the files into smaller chunks for easier transfer.
 
-To run the pipleine (from the Amazon workspace): `python regrid_maxar.py`. Select parts of the pipeline can be run by editing the user input code block in the file.
+To run the main data processing pipleine (from the Amazon workspace): `python regrid_maxar.py`. User-specific information is entered from command-line prompts.
