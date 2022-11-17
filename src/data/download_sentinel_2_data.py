@@ -1,7 +1,6 @@
 """
 A script to download the relevant data from the Sentinel 2 sattelite.
 """
-
 # package imports
 import ee
 import numpy as np
@@ -12,21 +11,8 @@ import sys
 import json
 from datetime import datetime
 
-### user defined inputs ###
-image_collection = "COPERNICUS/S2_SR"
-start_date = "2020-09-01"
-end_date = "2020-09-30"
-bands = ["B2", "B3", "B4"]
-image_bounds = [0, 3000]
-
-image_parameters = {
-    "image_collection": "COPERNICUS/S2_SR",
-    "start_date": "2020-09-01",
-    "end_date": "2020-09-30",
-    "bands": ["B2", "B3", "B4"],
-    "image_bounds": [0, 3000],
-}
-
+# activation of GEE
+ee.Authenticate()
 
 # initialize gee
 ee.Initialize()
@@ -39,7 +25,7 @@ def load_ref_coords(path, filename):
     return df_coords
 
 
-def save_sentinel_image(df, i, image_parameters):
+def save_sentinel_image(df_coords, i, image_parameters):
 
     # split image parameters into separate variables
     image_collection = image_parameters["image_collection"]
@@ -49,10 +35,10 @@ def save_sentinel_image(df, i, image_parameters):
     image_bounds = image_parameters["image_bounds"]
 
     # first retrieve the co-ordinates
-    coords, filecode = get_latlon_coords(df, i)
+    coords, filecode = get_latlon_coords(df_coords, i)
 
     # strip the relevant info from filename
-    sentinel_filename = "stl2_" + str(i) + "_" + filecode + ".png"
+    sentinel_filename = "csv_list/"+filecode + "_stl2_" + str(i) + "merged_VV" + ".png"
 
     # get the fdb image
     fdb_img = get_fdb_image(image_collection, coords, date_initial, date_final)
@@ -93,34 +79,40 @@ def get_latlon_coords(df_coords, i):
     x1 = coord_row.right.values[0]
     y0 = coord_row.bottom.values[0]
     y1 = coord_row.top.values[[0]]
-    coords_3857 = np.array([[x0, y0], [x0, y1], [x1, y1], [x1, y0]], dtype=object)
+    coords_3857 = np.array(
+        [[x0, y0], [x0, y1], [x1, y1], [x1, y0]], dtype=object)
 
     # change - to _ in filename to match with maxar data
     filename = coord_row.file_name.values[0][:8]
 
     # define the transformer
-    transformer = Transformer.from_crs("EPSG:31983", "EPSG:4326", always_xy=True)
+    transformer = Transformer.from_crs(
+        "EPSG:3857", "EPSG:4326", always_xy=True)
 
     # transform to lat lon (epsg:4326)
-    coords_x, coords_y = transformer.transform(coords_3857[:, 0], coords_3857[:, 1])
+    coords_x, coords_y = transformer.transform(
+        coords_3857[:, 0], coords_3857[:, 1])
 
     coords_latlon = np.dstack([coords_x, coords_y])[0].tolist()
     print(coords_latlon)
-
+    print(coords_x)
+    print(coords_y)
     return coords_latlon, filename
 
+def saving(df_path, image_parameters):
 
-if __name__ == "__main__":
-    df_coords = load_ref_coords(
-        "/home/tim/data/UNICEF_data/summary_data/", "BHM_merged.csv"
-    )
-    print(df_coords.head())
-    print(df_coords.info())
+    df_coords = load_ref_coords("", df_path)
+
+    # print(df_coords.head())
+    # print(df_coords.info())
 
     # coords_latlon, filename = get_latlon_coords(df_coords, 1)
     # print(coords_latlon, filename)
 
-    for i in range(1):
+    df = pd.read_csv(df_path)
+    n = df.shape[0]
+
+    for i in range(n):
         save_sentinel_image(df_coords, i, image_parameters)
 
     with open("parameters.json", "w") as outfile:
@@ -130,12 +122,22 @@ if __name__ == "__main__":
     date_time = now.strftime("%d.%m_%H.%M")
     print("date and time:", date_time)
 
-    # save_sentinel_image(
-    #     df_coords_full,
-    #     "full",
-    #     image_collection,
-    #     start_date,
-    #     end_date,
-    #     image_bounds,
-    #     bands,
-    # )
+
+### user defined inputs ###
+# This is what the user has to run to download the Sentinel images:
+# 1. It is necessary to specify the directory and file name of the csv containing the co-ordinates:
+# df_path = "file.csv"
+#
+# 2. Then, these parameters need to be specified (the data included is an example, see the option in the point 4): 
+# image_parameters = {"image_collection": "COPERNICUS/S1_GRD",
+#                    "start_date": "2020-09-01",
+#                    "end_date": "2020-09-30",
+#                    "bands": ["VV"],
+#                    "image_bounds": [-25, 5]}
+#
+# 3. And finally the function is called to run the script to download the data: 
+# saving(image_parameters=image_parameters, df_path=df_path)
+#
+# 4. Possible parameters to download from Sentinel 1 or Sentinel 2:
+# COPERNICUS/S2_SR; min: 0.0, max: 3000 bands B4, B3, B2
+# COPERNICUS/S1_GRD; min: -25, max: 5 bands VV,VH
