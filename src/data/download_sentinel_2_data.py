@@ -38,7 +38,7 @@ def save_sentinel_image(df_coords, i, image_parameters):
     coords, filecode = get_latlon_coords(df_coords, i)
 
     # strip the relevant info from filename
-    sentinel_filename = "csv_list/"+filecode + "_stl2_" + str(i) + "merged_VV" + ".png"
+    sentinel_filename = filecode + "_stl2_" + bands[0] + ".png"
 
     # get the fdb image
     fdb_img = get_fdb_image(image_collection, coords, date_initial, date_final)
