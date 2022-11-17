@@ -38,7 +38,6 @@ def list_VHM_files(datapath, writepath, filename_out, search_string=""):
     with open(writepath + filename_out, "w") as f:
         for folder in folder_list:
             file_search = glob.glob(folder + "/VHM-????-???" + search_string + ".tif")
-            print(file_search)
             for file in file_search:
                 f.write(file + "\n")
 
