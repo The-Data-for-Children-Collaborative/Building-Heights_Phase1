@@ -31,10 +31,12 @@ class depthDataset(Dataset):
 
         image_name = self.frame.loc[idx, 0]
         depth_name = self.frame.loc[idx, 1]
-        
+        vhm_name = self.frame.loc[idx, 2]
+
         # convert numpy arrays to tifs
         _, image_extension = os.path.splitext(image_name)
         _, depth_extension = os.path.splitext(depth_name)        
+        _, vhm_extension = os.path.splitext(vhm_name)
 
         # If the extension of file is .npy we treat is as a numpy array
         # Otherwise, we treat is an image, and Pillow will take care of it.
@@ -50,7 +52,13 @@ class depthDataset(Dataset):
         else:
             depth = Image.open(depth_name)
 
-        sample = {'image': image, 'depth': depth}
+        if vhm_extension == '.npy':
+            vhm = np.load(vhm_name)
+            vhm = vhm.reshape(vhm.shape[0], vhm.shape[1], 1)
+        else:
+            vhm = Image.open(vhm_name)
+
+        sample = {'image': image, 'depth': depth, 'vhm': vhm}
 
         if self.transform:
             sample = self.transform(sample)
@@ -234,17 +242,20 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
     end = time.time()
     for i, sample_batched in enumerate(train_loader):
 
-        image, depth = sample_batched['image'], sample_batched['depth']
+        image, depth, vhm = sample_batched['image'], sample_batched['depth'], sample_batched['vhm']
 
         # Not sure if this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
+        vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
 
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
+            vhm = image.cuda()
 
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
+        vhm = torch.autograd.Variable(vhm)
 
         ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
 
