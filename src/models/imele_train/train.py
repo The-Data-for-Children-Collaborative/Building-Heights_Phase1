@@ -160,6 +160,7 @@ def train_main(use_cuda, args):
     # speed up the process a lot when running on GPU/CUDA.
 
     batch_size = args.batch_size
+    vegetation_threshold = args.vmask
 
     if args.start_epoch != 0:
 
@@ -202,7 +203,7 @@ def train_main(use_cuda, args):
         adjust_learning_rate(optimizer, epoch)
 
         if(args.debug == False):
-            train(train_loader, model, optimizer, epoch, use_cuda)
+            train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
 
         # If a test set has been provided, we evaluate the loss there every epoch
 
@@ -214,7 +215,7 @@ def train_main(use_cuda, args):
         print('Snapshot saved to: {}'.format(modelname))
 
 
-def train(train_loader, model, optimizer, epoch, use_cuda):
+def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold):
     '''
         Performs an epoch of training.
 
@@ -248,8 +249,9 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
         vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
 
-        vegetation_threshold = 5
-        vhm.apply_(lambda x: 1 if x > vegetation_threshold/50 else 0)
+        # We convert the VHM to a binary map, with 0's where the vegetation exceeds the threshold
+
+        vhm.apply_(lambda x: 1 if x < vegetation_threshold/50 else 0)
 
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
@@ -451,6 +453,7 @@ if __name__ == '__main__':
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
     parser.add_argument('--batch_size', default=1, type=int, help='batch size (default: 1)')
+    parser.add_argument('--vmask', default=5, type=float, help='vegetation mask threshold (default: 5)')
 
     # Arguments concerning input and ouput data location
 
