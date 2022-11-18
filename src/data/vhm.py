@@ -7,7 +7,7 @@ import subprocess
 import regrid_maxar
 
 ### USER INPUTS ###
-use_subset = True
+use_subset = False
 overwrite_files = False
 
 ### END INPUTS  ###
@@ -41,9 +41,9 @@ regrid_maxar.reproject_all_bhm(listfiles_path + VHM_filename)
 
 # list the reprojected files
 if use_subset:
-    VHM_filename = "VHM_subset_reproj_list_subset.txt"
-else:
     VHM_filename = "VHM_subset_reproj_list.txt"
+else:
+    VHM_filename = "VHM_reproj_list.txt"
 list_files.list_VHM_files(
     VHM_init_path, listfiles_path, VHM_filename, search_string="_reproject"
 )
@@ -61,7 +61,10 @@ height_model_file_edges.write_csv(
 )
 
 # define the maxar csv file
-maxar_csv = "maxar_subset_pm.csv"
+if use_subset:
+    maxar_csv = "maxar_subset_pm.csv"
+else:
+    maxar_csv = "maxar_pm.csv"
 
 # project into maxar files (can it be done?)
 regrid_maxar.reproject_vhm_all(
@@ -75,7 +78,7 @@ if use_subset:
     VHM_filename = "VHM_subset_reproj_res_list.txt"
     VHM_csv = "VHM_subset_pm_res.csv"
 else:
-    VHM_filename = "VHM_subset_reproj_res_list.txt"
+    VHM_filename = "VHM_reproj_res_list.txt"
     VHM_csv = "VHM_pm_res.csv"
 
 list_files.list_VHM_files(
