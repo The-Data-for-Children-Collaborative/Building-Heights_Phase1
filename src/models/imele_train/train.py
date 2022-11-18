@@ -250,6 +250,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
         vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
 
         # We convert the VHM to a binary map, with 0's where the vegetation exceeds the threshold
+        # and 1's in the areas that we actually want to be considered when training
 
         vhm.apply_(lambda x: 1 if x < vegetation_threshold/50 else 0)
 
