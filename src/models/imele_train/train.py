@@ -248,6 +248,9 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
         vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
 
+        vegetation_threshold = 5
+        vhm.apply_(lambda x: 1 if x > vegetation_threshold/50 else 0)
+
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
@@ -271,6 +274,12 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         # The model is evaluated on the current feature sample
 
         output = model(image)
+
+        # We apply the vegetation mask to the input and the output images
+        # Note that torch.mul() performs element-wise multiplication
+
+        depth = torch.mul(depth, vhm)
+        output = torch.mul(output, vhm)
 
         # We calculate the loss function
 
