@@ -153,7 +153,7 @@ def eval_main(csv_filename, model_filename):
     # Now we can defined the model to be used for evaluation
 
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
-    model = torch.nn.DataParallel(model,device_ids=[0,1])
+    #model = torch.nn.DataParallel(model,device_ids=[0,1])
 
     # The pre-trained weights of the model are loaded in a dictionary
 
@@ -177,7 +177,7 @@ def eval_main(csv_filename, model_filename):
     if 'module.E.Harm.bias' in new_state_dict:
         new_state_dict.pop('module.E.Harm.bias')
 
-    model.load_state_dict(new_state_dict)
+    #model.load_state_dict(new_state_dict)
 
     # We are ready to set the model in 'evaluation' mode...
 
