@@ -257,8 +257,8 @@ def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
-            vhm = image.cuda()
-
+            vhm = vhm.cuda(non_blocking=True)
+        
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
         vhm = torch.autograd.Variable(vhm)
@@ -280,7 +280,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
 
         # We apply the vegetation mask to the input and the output images
         # Note that torch.mul() performs element-wise multiplication
-
+        
         depth = torch.mul(depth, vhm)
         output = torch.mul(output, vhm)
 
