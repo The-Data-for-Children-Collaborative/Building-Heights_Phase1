@@ -68,7 +68,7 @@ def make_train_test_dirs(folder, train_csv, test_csv, zip=False):
             pass
 
     copy_files(folder, train_csv, dir_maxar_train, dir_bhm_train, dir_vhm_train)
-    copy_files(folder, test_csv, dir_maxar_test, dir_bhm_test, dir_vhm_train)
+    copy_files(folder, test_csv, dir_maxar_test, dir_bhm_test, dir_vhm_test)
 
 
 def copy_files(
@@ -85,8 +85,8 @@ def copy_files(
         bhm_array = np.load(input_dir + "sliced_bhm/" + bhm_filename)
         try:
             vhm_array = np.load(input_dir + "sliced_vhm/" + vhm_filename)
-            print("vhm file", vhm_filename, "not found: making array of zeros")
         except FileNotFoundError:
+            print("vhm file", vhm_filename, "not found: making array of zeros")
             vhm_array = np.zeros_like(bhm_array)
         if np.shape(maxar_array) == (500, 500, 4):
             np.save(maxar_output_dir + maxar_filename, maxar_array)
