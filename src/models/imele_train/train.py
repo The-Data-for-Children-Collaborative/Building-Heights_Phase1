@@ -31,12 +31,14 @@ class depthDataset(Dataset):
 
         image_name = self.frame.loc[idx, 0]
         depth_name = self.frame.loc[idx, 1]
-        vhm_name = self.frame.loc[idx, 2]
+        vhm_name = self.frame.loc[idx, 2] if len(self.frame.columns) > 2 else None
 
         # convert numpy arrays to tifs
         _, image_extension = os.path.splitext(image_name)
         _, depth_extension = os.path.splitext(depth_name)        
-        _, vhm_extension = os.path.splitext(vhm_name)
+
+        if vhm_name != None:
+            _, vhm_extension = os.path.splitext(vhm_name)
 
         # If the extension of file is .npy we treat is as a numpy array
         # Otherwise, we treat is an image, and Pillow will take care of it.
@@ -52,11 +54,14 @@ class depthDataset(Dataset):
         else:
             depth = Image.open(depth_name)
 
-        if vhm_extension == '.npy':
-            vhm = np.load(vhm_name)
-            vhm = vhm.reshape(vhm.shape[0], vhm.shape[1], 1)
-        else:
-            vhm = Image.open(vhm_name)
+        vhm = None
+        if vhm_name != None:
+
+            if vhm_extension == '.npy':
+                vhm = np.load(vhm_name)
+                vhm = vhm.reshape(vhm.shape[0], vhm.shape[1], 1)
+            else:
+                vhm = Image.open(vhm_name)
 
         sample = {'image': image, 'depth': depth, 'vhm': vhm}
 
@@ -258,7 +263,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
             vhm = vhm.cuda(non_blocking=True)
-        
+
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
         vhm = torch.autograd.Variable(vhm)
