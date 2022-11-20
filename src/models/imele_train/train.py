@@ -213,7 +213,7 @@ def train_main(use_cuda, args):
         # If a test set has been provided, we evaluate the loss there every epoch
 
         if args.test != None:
-            loss_on_test_set(test_loader, model, epoch, use_cuda)
+            loss_on_test_set(test_loader, model, epoch, use_cuda, vegetation_threshold)
 
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
@@ -327,7 +327,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
         log_file.write(message + '\n')
 
 
-def loss_on_test_set(test_loader, model, epoch, use_cuda):
+def loss_on_test_set(test_loader, model, epoch, use_cuda, vegetation_threshold):
     '''
         Given a (trained or partially trained) model, evaluates the loss on the training set.
 
@@ -352,17 +352,25 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
 
     for i, sample_batched in enumerate(test_loader):
 
-        image, depth = sample_batched['image'], sample_batched['depth']
+        image, depth, vhm = sample_batched['image'], sample_batched['depth'], sample_batched['vhm']
 
         # Not sure if this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250, 250), mode='bilinear')
+        vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
+
+        # We convert the VHM to a binary map, with 0's where the vegetation exceeds the threshold
+        # and 1's in the areas that we actually want to be considered when training
+
+        vhm.apply_(lambda x: 1 if x < vegetation_threshold/50 else 0)
 
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
+            vhm = vhm.cuda(non_blocking=True)
 
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
+        vhm = torch.autograd.Variable(vhm)
 
         ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
 
@@ -374,6 +382,12 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
         # The model is evaluated on the current feature sample
 
         output = model(image)
+
+        # We apply the vegetation mask to the input and the output images
+        # Note that torch.mul() performs element-wise multiplication
+
+        depth = torch.mul(depth, vhm)
+        output = torch.mul(output, vhm)
 
         # We calculate the loss function
 
