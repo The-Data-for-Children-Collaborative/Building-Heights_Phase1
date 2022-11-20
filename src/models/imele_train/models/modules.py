@@ -366,3 +366,25 @@ class R(nn.Module):
 
 
         return x4
+
+
+class PP(nn.Module):
+    def __init__(self, in_channels, out_channels):
+
+        super(PP, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, bias=True)
+
+    def forward(self, x):
+
+        xprime = self.conv(x)
+        return xprime
+
+class Renormalizer(nn.Module):
+    def __init__(self):
+
+        super(Renormalizer, self).__init__()
+
+    def forward(self, x):
+
+        return x
+

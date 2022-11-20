@@ -20,6 +20,13 @@ class model(nn.Module):
 
         super(model, self).__init__()
 
+        # We add a preprocessing stage, for going from an arbitrary number of channels to three
+        self.PP = modules.PP(4, 3)
+
+        # After the pre-processing stage, the input needs to be normalized again to match the Imagenet dataset.
+        self.Renormalizer = modules.Renormalizer()
+
+        # Then we proceed with the 'standard' IMELE architecture
         self.E = Encoder
         self.D2 = modules.D2(num_features = num_features)
         self.MFF = modules.MFF(block_channel)
@@ -27,6 +34,10 @@ class model(nn.Module):
 
 
     def forward(self, x):
+
+        # x = self.PP(x)
+        # x = self.Renormalizer(x)
+
         x_block0, x_block1, x_block2, x_block3, x_block4 = self.E(x)
   
         x = x_block0.view(-1,250,250)

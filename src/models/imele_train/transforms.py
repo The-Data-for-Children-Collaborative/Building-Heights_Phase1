@@ -31,10 +31,10 @@ class ToTensor(object):
 
             # Handle numpy tensor, removing the opacity channel if present
 
-            if pic.shape[2] == 1 or pic.shape[2] == 3:
-                img = torch.from_numpy(pic)
-                nchannel = pic.shape[2]
-            elif pic.shape[2] == 4:
+            img = torch.from_numpy(pic)
+            nchannel = pic.shape[2]
+
+            if nchannel == 4 and img[:,:,3].flatten().mean() == 255:
                 img = torch.from_numpy(pic[:, :, (0, 1, 2)])
                 nchannel = 3
 
