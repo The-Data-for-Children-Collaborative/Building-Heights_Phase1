@@ -372,12 +372,13 @@ class PP(nn.Module):
     def __init__(self, in_channels, out_channels):
 
         super(PP, self).__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, bias=True)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=True, padding='same')
 
     def forward(self, x):
 
         xprime = self.conv(x)
         return xprime
+
 
 class Renormalizer(nn.Module):
     def __init__(self):
@@ -386,8 +387,14 @@ class Renormalizer(nn.Module):
 
     def forward(self, x):
 
-        # output[channel] = (input[channel] - mean[channel]) / std[channel]
-        # output[channel] *= desired_std
-        # output[channel] += desired_mean
+        __imagenet_stats = {'mean': [0.485, 0.456, 0.406],
+                            'std': [0.229, 0.224, 0.225]}
 
-        return x
+        y = torch.zeros_like(x)
+
+        for channel in range(0,4):
+            y[channel] = (x[channel] - torch.mean(x[channel])) / torch.std(x[channel])
+            y[channel] *= __imagenet_stats['std'][channel]
+            y[channel] += __imagenet_stats['mean'][channel]
+
+        return y

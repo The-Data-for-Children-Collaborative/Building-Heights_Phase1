@@ -29,15 +29,20 @@ class ToTensor(object):
 
         if isinstance(pic, np.ndarray):
 
-            # Handle numpy tensor, removing the opacity (alpha) channel if present
+            # Handle numpy tensor, removing the opacity (alpha) channel if present.
+            # Note that the alpha channel would have only entries with the '255' value.
 
             img = torch.from_numpy(pic)
             nchannel = pic.shape[2]
 
-            if nchannel == 4 and img[:,:,3].flatten().sum() == 255 * img[:,:,3].flatten().size(dim=0):
-                print('Removing alpha channel!')
-                img = torch.from_numpy(pic[:, :, (0, 1, 2)])
-                nchannel = 3
+            if nchannel == 4:
+
+                fourth_channel_is_alpha = img[:, :, 3].flatten().sum() == 255 * img[:, :, 3].flatten().size(dim=0)
+
+                if fourth_channel_is_alpha == True:
+                    print('Removing alpha channel!')
+                    img = torch.from_numpy(pic[:, :, (0, 1, 2)])
+                    nchannel = 3
 
         else:
 
