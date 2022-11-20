@@ -145,6 +145,11 @@ def train_main(use_cuda, args):
 
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
 
+    # We count the number of trainable parameters in the model and we print it
+
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('Number of trainable parameters in the current model: {}'.format(pytorch_total_params))
+
     # Input images can be loaded in batches, resulting in a tensor of shape
     # [ nr_batches, nr_channels, x_dim, y_dim ]
     #
