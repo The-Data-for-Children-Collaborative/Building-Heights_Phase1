@@ -44,7 +44,7 @@ def add_vhms_to_csvs(folder):
                 f.write(newline)
 
 
-def make_train_test_dirs(folder, train_csv, test_csv, zip=False):
+def make_train_test_dirs(folder, train_csv, test_csv, clean_files):
 
     # make directories if they don't exist
     dir_bhm_train = folder + "train_bhm_sliced/"
@@ -66,6 +66,9 @@ def make_train_test_dirs(folder, train_csv, test_csv, zip=False):
             os.mkdir(dir)
         except FileExistsError:
             pass
+
+        if clean_files:
+            os.rmdir(dir)
 
     copy_files(folder, train_csv, dir_maxar_train, dir_bhm_train, dir_vhm_train)
     copy_files(folder, test_csv, dir_maxar_test, dir_bhm_test, dir_vhm_test)
@@ -102,11 +105,11 @@ def copy_files(
 
 if __name__ == "__main__":
 
-    folder = "/home/tim/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_10/"
-
+    folder = "/home/tim/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/"
     force_overwrite = True
+    clean_files = True
     if not os.path.isfile(folder + "pairings_train.csv") or force_overwrite:
         print("making csvs")
         make_split_csvs(folder, "pairings.csv")
         add_vhms_to_csvs(folder)
-    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv")
+    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
