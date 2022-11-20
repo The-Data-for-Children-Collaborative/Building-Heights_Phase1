@@ -386,5 +386,8 @@ class Renormalizer(nn.Module):
 
     def forward(self, x):
 
-        return x
+        # output[channel] = (input[channel] - mean[channel]) / std[channel]
+        # output[channel] *= desired_std
+        # output[channel] += desired_mean
 
+        return x
