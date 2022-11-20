@@ -88,20 +88,16 @@ def copy_files(
         except FileNotFoundError:
             print("vhm file", vhm_filename, "not found: making array of zeros")
             vhm_array = np.zeros_like(bhm_array)
-        if np.shape(maxar_array) == (500, 500, 4):
+        if (
+            np.shape(maxar_array) == (500, 500, 4)
+            and np.shape(bhm_array) == (500, 500)
+            and np.shape(vhm_array) == (500, 500)
+        ):
             np.save(maxar_output_dir + maxar_filename, maxar_array)
-            # shutil.copyfile(
-            #     input_dir + "sliced_maxar/" + maxar_filename,
-            #     maxar_output_dir + maxar_filename,
-            # )
-        if np.shape(bhm_array) == (500, 500):
             np.save(bhm_output_dir + bhm_filename, bhm_array)
-            # shutil.copyfile(
-            #     input_dir + "sliced_bhm/" + bhm_filename, bhm_output_dir + bhm_filename
-            # )
-
-        if np.shape(vhm_array) == (500, 500):
             np.save(vhm_output_dir + vhm_filename, vhm_array)
+        else:
+            print("Error in dimensions: check slicing for file", maxar_filename)
 
 
 if __name__ == "__main__":
