@@ -4,17 +4,26 @@ import shutil
 import numpy as np
 
 
-def make_split_csvs(folder, filename, train_frac=0.85):
-    with open(folder + "pairings.csv", "r") as f:
+def make_split_csvs(folder, pairings_file, train_frac=0.85):
+    """
+    Randomly split bhm/maxar file into train/test.
+
+    Parameters
+    ----------
+    folder: str
+        base folder for the paired files
+
+    train_frac : float, optional
+        fraction of samples to put into training
+    """
+    with open(folder + pairings_file, "r") as f:
         lines = f.readlines()
-    header = lines[0]
     lines = lines[1:]
 
+    # shuffle and divide to train / test
     random.shuffle(lines)
-
     N_tot = len(lines)
     N_train = int(train_frac * N_tot)
-
     train_files = lines[:N_train]
     test_files = lines[N_train:]
 
@@ -28,7 +37,14 @@ def make_split_csvs(folder, filename, train_frac=0.85):
 
 
 def add_vhms_to_csvs(folder):
+    """
+    Add vhm files to to the pairings.csv file.
 
+    Parameters
+    ----------
+    folder : str
+        directory containing the pairings_*.csv files
+    """
     splits = ["train", "test"]
 
     for split in splits:
@@ -44,7 +60,19 @@ def add_vhms_to_csvs(folder):
                 f.write(newline)
 
 
-def make_train_test_dirs(folder, train_csv, test_csv, clean_files):
+def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
+    """
+    Make train and test sub-directories and copy files into them.
+
+    Parameters
+    ----------
+    train_csv : str
+        name of the training csv file
+    test_csv : str
+        name of the test csv file
+    clean_files : bool, optional
+        whether to delete existing files
+    """
 
     # make directories if they don't exist
     dir_bhm_train = folder + "train_bhm_sliced/"
@@ -67,9 +95,11 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files):
         except FileExistsError:
             pass
 
+        # delete existing files
         if clean_files:
             os.rmdir(dir)
 
+    # copy files into new dirs
     copy_files(folder, train_csv, dir_maxar_train, dir_bhm_train, dir_vhm_train)
     copy_files(folder, test_csv, dir_maxar_test, dir_bhm_test, dir_vhm_test)
 
