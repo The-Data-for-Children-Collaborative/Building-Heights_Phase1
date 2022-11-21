@@ -392,9 +392,10 @@ class Renormalizer(nn.Module):
 
         y = torch.zeros_like(x)
 
-        for channel in range(0,4):
-            y[channel] = (x[channel] - torch.mean(x[channel])) / torch.std(x[channel])
-            y[channel] *= __imagenet_stats['std'][channel]
-            y[channel] += __imagenet_stats['mean'][channel]
+        for batch_id in range(0, x.shape[0]):
+            for channel in range(0, 3):
+                y[batch_id, channel] = (x[batch_id, channel] - torch.mean(x[batch_id, channel])) / torch.std(x[batch_id, channel])
+                y[batch_id, channel] *= __imagenet_stats['std'][channel]
+                y[batch_id, channel] += __imagenet_stats['mean'][channel]
 
         return y
