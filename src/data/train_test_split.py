@@ -2,6 +2,7 @@ import random
 import os
 import shutil
 import numpy as np
+import sys
 
 
 def make_split_csvs(folder, pairings_file, train_frac=0.85):
@@ -82,7 +83,7 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
     dir_maxar_train = folder + "train_maxar_sliced/"
     dir_maxar_test = folder + "test_maxar_sliced/"
 
-    for dir in [
+    for dirm in [
         dir_bhm_train,
         dir_bhm_test,
         dir_vhm_train,
@@ -91,17 +92,59 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
         dir_maxar_test,
     ]:
         try:
-            os.mkdir(dir)
+            os.mkdir(dirm)
         except FileExistsError:
-            pass
+            print("deleting")
+            shutil.rmtree(dirm)
+            print("making")
+            os.mkdir(dirm)
 
         # delete existing files
-        if clean_files:
-            os.rmdir(dir)
+        # if clean_files:
+        #     os.rmdir(dir)
 
     # copy files into new dirs
     copy_files(folder, train_csv, dir_maxar_train, dir_bhm_train, dir_vhm_train)
     copy_files(folder, test_csv, dir_maxar_test, dir_bhm_test, dir_vhm_test)
+
+
+def make_vhm_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
+    """
+    Make train and test sub-directories and copy files into them.
+
+    Parameters
+    ----------
+    train_csv : str
+        name of the training csv file
+    test_csv : str
+        name of the test csv file
+    clean_files : bool, optional
+        whether to delete existing files
+    """
+
+    # make directories if they don't exist
+    dir_vhm_train = folder + "train_vhm_sliced/"
+    dir_vhm_test = folder + "test_vhm_sliced/"
+
+    for dirm in [
+        dir_vhm_train,
+        dir_vhm_test,
+    ]:
+        try:
+            os.mkdir(dirm)
+        except FileExistsError:
+            print("deleting")
+            shutil.rmtree(dirm)
+            print("making")
+            os.mkdir(dirm)
+
+        # delete existing files
+        # if clean_files:
+        #     os.rmdir(dir)
+
+    # copy files into new dirs
+    copy_vhm_files(folder, train_csv, dir_vhm_train)
+    copy_vhm_files(folder, test_csv, dir_vhm_test)
 
 
 def copy_files(
@@ -133,13 +176,39 @@ def copy_files(
             print("Error in dimensions: check slicing for file", maxar_filename)
 
 
+def copy_vhm_files(input_dir, input_filename, vhm_output_dir):
+
+    with open(input_dir + input_filename) as f:
+        lines = f.readlines()
+
+    for i, filenames in enumerate(lines):
+        maxar_filename, bhm_filename, vhm_filename = filenames[:-1].split(",")
+        print(i, "/", len(lines))
+        try:
+            vhm_array = np.load(input_dir + "sliced_vhm/" + vhm_filename)
+        except FileNotFoundError:
+            print("vhm file", vhm_filename, "not found: making array of zeros")
+            vhm_array = np.zeros((500, 500))
+        if np.shape(vhm_array) == (500, 500):
+            np.save(vhm_output_dir + vhm_filename, vhm_array)
+        else:
+            print("Error in dimensions: check slicing for file", vhm_filename)
+
+
 if __name__ == "__main__":
 
-    folder = "/home/tim/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/"
-    force_overwrite = True
-    clean_files = True
+    folder = (
+        "/home/tim/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_"
+        + sys.argv[1]
+        + "/"
+    )
+    force_overwrite = False
+    clean_files = False
     if not os.path.isfile(folder + "pairings_train.csv") or force_overwrite:
         print("making csvs")
         make_split_csvs(folder, "pairings.csv")
-        add_vhms_to_csvs(folder)
-    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
+    add_vhms_to_csvs(folder)
+    # make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
+    make_vhm_train_test_dirs(
+        folder, "triplets_train.csv", "triplets_test.csv", clean_files
+    )
