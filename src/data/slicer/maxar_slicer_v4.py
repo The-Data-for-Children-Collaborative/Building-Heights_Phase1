@@ -131,10 +131,10 @@ for file in os.scandir(directory):
                 if startx + width >= numpydata.shape[1] -1:
                     startx = numpydata.shape[1] - 1
                     last_block = numpydata[starty - height: starty, startx - width : startx, :]
-                    path_join = os.path.join(sliced_dir, file_name + '_y' + str(starty - height) + 'x' + str(startx - width) + '.npy')
+                    path_join = os.path.join(sliced_dir, file_name + '_y' + str(starty-height) + 'x' + str(startx-width) + '.npy')
                     np.save(path_join , last_block, allow_pickle=True)
                     counter +=1
-                    print('This is the last block: ', path_join , 'Shape: ', last_block.shape)
+                    print('WATCH OUT!! : ', path_join , 'Shape: ', last_block.shape)
 
             print('Number of cropped photos from the current image: ', counter )
 

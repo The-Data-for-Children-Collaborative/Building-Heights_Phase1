@@ -1,4 +1,4 @@
-###Crops the bottom left block from a maxar image and saves it in the directory where all other sliced images are
+### Fixes the bug caused by slicer_v3: Crops the bottom left block from a maxar image and saves it in the directory where all other sliced images are
 # the user needs to insert the path to the maxar folder and the path of the sliced directory
 
 import numpy as np
@@ -118,11 +118,12 @@ print('Here is your list of sliced files')
 for file in os.scandir(sliced_dir_maxar):
     if file.is_file():
         file_name_ext = os.path.basename(file)
-        numpy_array = np.load(file)
-        print(file_name_ext, numpy_array.shape)
+        if file_name_ext.endswith(".npy"):
+            numpy_array = np.load(file, allow_pickle=True)
+            print(file_name_ext, numpy_array.shape)
 
-        if numpy_array.shape != (500, 500, 4):
-            weird_maxar.append(file_name_ext)
+            if numpy_array.shape != (500, 500, 4):
+                weird_maxar.append(file_name_ext)
 
 weird_maxar.sort()
 print('Here is the list of files with a weird dimension ', weird_maxar)
@@ -135,11 +136,12 @@ print('Here is your list of sliced files')
 for file in os.scandir(sliced_dir_bhm):
     if file.is_file():
         file_name_ext = os.path.basename(file)
-        numpy_array = np.load(file)
-        print(file_name_ext, numpy_array.shape)
-        count +=1
-        if numpy_array.shape != (500, 500):
-            weird_bhm.append(file_name_ext)
+        if file_name_ext.endswith(".npy"):
+            numpy_array = np.load(file, allow_pickle=True)
+            print(file_name_ext, numpy_array.shape)
+            count +=1
+            if numpy_array.shape != (500, 500):
+                weird_bhm.append(file_name_ext)
 
 weird_bhm.sort()
 print('There are ', count, ' files ')
@@ -155,7 +157,7 @@ list_of_files_BHM = sorted( filter( lambda x: os.path.isfile(os.path.join(sliced
                         os.listdir(sliced_dir_bhm) ) )
 
 if len(list_of_files_maxar) != len(list_of_files_BHM):
-    print("Error: the lists have different lengths")
+    print("Error: the lists have different lengths, " , len(list_of_files_maxar), len(list_of_files_BHM))
 
 else:
     #destination = os.path.commonprefix([sliced_dir_maxar, sliced_dir_bhm]) #common ancestor of the sliced_directory
