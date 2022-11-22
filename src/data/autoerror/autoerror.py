@@ -154,7 +154,7 @@ def error_on_segments(ground_truth, prediction):
         counter += 1 # Numbers of pixels in the current building
 
         height = np.multiply(mask, z1).sum() / mask.sum()
-        all_errors.append({'error': this_error, 'height': 0})
+        all_errors.append({'error': this_error, 'height': height})
 
     # Finally we return the average error, the average height, and the histogram with all errors.
 
