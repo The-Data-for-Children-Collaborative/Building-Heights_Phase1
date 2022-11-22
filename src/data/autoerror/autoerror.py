@@ -158,7 +158,7 @@ def error_on_segments(ground_truth, prediction):
 
     # Finally we return the average error, the average height, and the histogram with all errors.
 
-    return average / counter, z1.mean(), all_errors
+    return (average / counter, z1.mean(), all_errors)  if counter > 0 else (0, 0, [])
 
 
 
