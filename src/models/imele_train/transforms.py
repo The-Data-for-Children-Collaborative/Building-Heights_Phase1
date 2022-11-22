@@ -22,20 +22,21 @@ class ToTensor(object):
             depth = self.to_tensor(depth)/50
         else:
             depth = self.to_tensor(depth)/100000
-
-        if vhm != None:
-
+            
+        try:
             if isinstance(vhm, np.ndarray):
                 vhm = self.to_tensor(vhm)/50
             else:
                 vhm = self.to_tensor(vhm)/100000
 
-        else:
+        # If no height map has been specified, we construct a uniformly
+        # negative heightmap, so that the training will happen on the whole image.
 
-            # If no height map has been specified, we construct a uniformly
-            # negative heightmap, so that the training will happen on the whole image.
-
+        except AttributeError:
             vhm = -torch.ones_like(depth)
+
+
+        #vhm = -torch.ones_like(depth)
 
         return {'image': image, 'depth': depth, 'vhm': vhm}
 
