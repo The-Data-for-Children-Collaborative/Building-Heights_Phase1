@@ -163,7 +163,6 @@ def error_on_segments(ground_truth, prediction):
 
 
 
-#if __name__ == "__main__":
 
 # The directory for the data
 pairs="pairs_17"
@@ -187,8 +186,8 @@ df=pd.DataFrame({"prediction_dir":prediction_directories})
 df['pairs']=df.prediction_dir
 df["abs_error"]=df.prediction_dir
 df["all_error"]=df.prediction_dir
+df["all_heights"]=df.prediction_dir
 pairs = []
-dir= []
 #for directory in prediction_directories: #use if do not want to distinguish between directories
 for index,row in df.iterrows(): #iuse if want to dicsinguish between directories
     directory=row.prediction_dir
@@ -208,7 +207,10 @@ counter = 0
 histogram = []
 
 for index,row in df.iterrows():
-
+    print(index)
+    absolute_error = 0
+    counter = 0
+    histogram = []
     for pair in row.pairs:
 
         if not os.path.exists(pair['bhm']):
@@ -217,8 +219,7 @@ for index,row in df.iterrows():
         if not os.path.exists(pair['prediction']):
             continue
 
-        print(pair)
-        print('Loading {} (BHM) and {} (prediction)'.format(pair['bhm'], pair['prediction']))
+        #print('Loading {} (BHM) and {} (prediction)'.format(pair['bhm'], pair['prediction']))
 
         error, mean, all_errors = error_on_centroids(pair['bhm'], pair['prediction'])
 
@@ -227,16 +228,15 @@ for index,row in df.iterrows():
         histogram.extend(all_errors)
 
     absolute_error /= counter
-    row.abs_error=absolute_error
-    row.all_error=list(map(lambda x: x['error'], histogram))
-
-#print('Absolute error (in meters) calculated over {} files, centroid-by-centroid: {}'.format(counter, absolute_error))
-
-    with open(str(row.prediction_dir[0])+"centroids.histogram", "wb") as fp:
+    print(row.prediction_dir)
+    with open(path+"prediction_error/"+str(row.prediction_dir)+"_centroids.histogram", "wb") as fp:
         pickle.dump(histogram, fp)
         fp.close()
+    row.abs_error=absolute_error
+    row.all_error=list(map(lambda x: x['error'], histogram))
+    row.all_heights=list(map(lambda x: x['height'], histogram))
 
-error_csv=path+"centroid_error.csv"
+error_csv=path+"prediction_error/"+"centroid_error.csv"
 if os.path.isfile(error_csv)==False:
         df[["prediction_dir","abs_error","all_error"]].to_csv(error_csv)
         print(error_csv+" created")
