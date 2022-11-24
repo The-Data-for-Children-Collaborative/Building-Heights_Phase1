@@ -159,7 +159,7 @@ def error_on_segments(ground_truth, prediction):
 
     # Finally we return the average error, the average height, and the histogram with all errors.
 
-    return average / counter, z1.mean(), all_errors
+    return (average / counter, z1.mean(), all_errors) if counter > 0 else (0, 0, [])
 
 
 
@@ -247,36 +247,3 @@ if os.path.isfile(error_csv)==False:
 # or also
 # sns.violinplot(data=histogram, palette="muted", split=True, cut=0)
 # and then saving it to a file? What's the command?
-
-# Now we do the same, but with error_on_segments()
-
-""" absolute_error = 0
-counter = 0
-histogram = []
-
-for pair in pairs:
-
-    if not os.path.exists(pair['bhm']):
-        continue
-
-    if not os.path.exists(pair['prediction']):
-        continue
-
-    print('Loading {} (BHM) and {} (prediction)'.format(pair['bhm'], pair['prediction']))
-
-    error, mean, all_errors = error_on_segments(pair['bhm'], pair['prediction'])
-
-    absolute_error += error * mean
-    counter += 1
-    histogram.extend(all_errors)
-
-absolute_error /= counter
-
-print('Absolute error (in meters) calculated over {} files, segment-by-segment: {}'.format(counter, absolute_error))
-
-with open(str(df.prediction_dir[0])+"segments.histogram", "wb") as fp:
-    pickle.dump(histogram, fp)
- """
-# Also here, one could save the histogram!
-
-# Finally, one can define maybe 3 or 4 classes of buildings, by height. And evaluate the errors (also with histograms), class by class.
