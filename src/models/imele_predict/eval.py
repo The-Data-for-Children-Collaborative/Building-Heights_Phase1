@@ -126,6 +126,7 @@ def eval_main(csv_filename, model_filename, use_gpu):
 
         Parameters: csv_filename, a string with the path of the CSV file
                     model_filename, a string with the location of the pretrained model
+                    use_gpu, a string with either no (Default), when not running on a GPU server or "yes", when running on a GPU server
     '''
     #if run predictions on GPU server:
     #only if run on GPU SERVER!!!!
