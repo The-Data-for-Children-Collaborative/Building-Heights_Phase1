@@ -9,5 +9,6 @@ Brief description of each file:
 * `height_model_file_edges.py`: extracts pixel, co-ordinate, and height data (if applicable) from tif files
 * `list_files.py`: makes a list of desired BHM or maxar files
 * `filter_files.py`: should be run only after `regrid_maxar.py` has generated the final cropped matching pairs and the corresponding csv files. Filters out "small" images (either based on the number of pixels or the average pixel resolution), copies and zips the files into smaller chunks for easier transfer.
+* `train_test_split.py` : splits maxar, bhm and vhm files randomly into train and test folders. Accepts a command line argument for the pairs to split, so should be run for example as `python train_test_split.py 0` for `pairs_0`.
 
 To run the main data processing pipleine (from the Amazon workspace): `python regrid_maxar.py`. User-specific information is entered from command-line prompts.
