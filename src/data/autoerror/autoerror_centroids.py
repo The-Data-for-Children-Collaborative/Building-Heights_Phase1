@@ -179,7 +179,7 @@ bhm_directory = 'sliced_bhm'
 # saves a histogram file for each directory, but one csv-file with one row for each prediction directory
 # prediction files must start with maxar- in this set up. And ground_truth data must start with bhm-
 
-prediction_directories = ['train_maxar_sliced_prediction_17only_epoch3',
+prediction_directories = ['train_maxar_sliced_prediction_17only_epoch3'],
                             'train_maxar_sliced_prediction_17only_epoch20',
                             'train_maxar_sliced_prediction_17only_epoch50',
                             'train_maxar_sliced_prediction_pair16_17_epoch50']
@@ -236,10 +236,15 @@ for index,row in df.iterrows():
         pickle.dump(histogram, fp)
         fp.close()
 
+
 error_csv=path+"centroid_error.csv"
-if os.path.isfile(error_csv)==False:
-        df[["prediction_dir","abs_error","all_error"]].to_csv(error_csv)
-        print(error_csv+" created")
+if os.path.isfile(error_csv)==True:
+        print("WARNING! \n"+error_csv+" already exists.\n")
+        abort= input("Do you want to continue?  [y/n] ")
+        if abort=="n":
+            exit()
+df[["prediction_dir","abs_error","all_error"]].to_csv(error_csv)
+print(error_csv+" created")
 # Here one could plot the histograms
 # Something like
 # import seaborn as sns
@@ -249,7 +254,7 @@ if os.path.isfile(error_csv)==False:
 # and then saving it to a file? What's the command?
 
 # Now we do the same, but with error_on_segments()
-
+# running over miltiple directories for different epochs has not been extended to segment error calculation. Therefore the code below is commented.
 """ absolute_error = 0
 counter = 0
 histogram = []
