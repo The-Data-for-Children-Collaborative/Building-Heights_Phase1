@@ -31,7 +31,7 @@ class depthDataset(Dataset):
 
         image_name = self.frame.loc[idx, 0]
         depth_name = self.frame.loc[idx, 1]
-        
+
         # convert numpy arrays to tifs
         _, image_extension = os.path.splitext(image_name)
         _, depth_extension = os.path.splitext(depth_name)        
@@ -50,7 +50,18 @@ class depthDataset(Dataset):
         else:
             depth = Image.open(depth_name)
 
-        sample = {'image': image, 'depth': depth}
+        vhm = None
+        if len(self.frame.columns) > 2:
+            vhm_name = self.frame.loc[idx, 2] if len(self.frame.columns) > 2 else None            
+            _, vhm_extension = os.path.splitext(vhm_name)
+
+            if vhm_extension == '.npy':
+                vhm = np.load(vhm_name)
+                vhm = vhm.reshape(vhm.shape[0], vhm.shape[1], 1)
+            else:
+                vhm = Image.open(vhm_name)
+
+        sample = {'image': image, 'depth': depth, 'vhm': vhm}
 
         if self.transform:
             sample = self.transform(sample)
@@ -157,6 +168,7 @@ def train_main(use_cuda, args):
     # speed up the process a lot when running on GPU/CUDA.
 
     batch_size = args.batch_size
+    vegetation_threshold = args.vmask
 
     if args.start_epoch != 0:
 
@@ -199,19 +211,19 @@ def train_main(use_cuda, args):
         adjust_learning_rate(optimizer, epoch)
 
         if(args.debug == False):
-            train(train_loader, model, optimizer, epoch, use_cuda)
+            train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold)
 
         # If a test set has been provided, we evaluate the loss there every epoch
 
         if args.test != None:
-            loss_on_test_set(test_loader, model, epoch, use_cuda)
+            loss_on_test_set(test_loader, model, epoch, use_cuda, vegetation_threshold)
 
         out_name = save_model + str(epoch) + '.pth.tar'
         modelname = save_checkpoint({'state_dict': model.state_dict()}, out_name)
         print('Snapshot saved to: {}'.format(modelname))
 
 
-def train(train_loader, model, optimizer, epoch, use_cuda):
+def train(train_loader, model, optimizer, epoch, use_cuda, vegetation_threshold):
     '''
         Performs an epoch of training.
 
@@ -239,17 +251,25 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
     end = time.time()
     for i, sample_batched in enumerate(train_loader):
 
-        image, depth = sample_batched['image'], sample_batched['depth']
+        image, depth, vhm = sample_batched['image'], sample_batched['depth'], sample_batched['vhm']
 
         # Not sure if this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250,250), mode='bilinear')
+        vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
+
+        # We convert the VHM to a binary map, with 0's where the vegetation exceeds the threshold
+        # and 1's in the areas that we actually want to be considered when training
+
+        vhm.apply_(lambda x: 1 if x < vegetation_threshold/50 else 0)
 
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
+            vhm = vhm.cuda(non_blocking=True)
 
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
+        vhm = torch.autograd.Variable(vhm)
 
         ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
 
@@ -265,6 +285,12 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         # The model is evaluated on the current feature sample
 
         output = model(image)
+
+        # We apply the vegetation mask to the input and the output images
+        # Note that torch.mul() performs element-wise multiplication
+        
+        depth = torch.mul(depth, vhm)
+        output = torch.mul(output, vhm)
 
         # We calculate the loss function
 
@@ -304,7 +330,7 @@ def train(train_loader, model, optimizer, epoch, use_cuda):
         log_file.write(message + '\n')
 
 
-def loss_on_test_set(test_loader, model, epoch, use_cuda):
+def loss_on_test_set(test_loader, model, epoch, use_cuda, vegetation_threshold):
     '''
         Given a (trained or partially trained) model, evaluates the loss on the training set.
 
@@ -329,17 +355,25 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
 
     for i, sample_batched in enumerate(test_loader):
 
-        image, depth = sample_batched['image'], sample_batched['depth']
+        image, depth, vhm = sample_batched['image'], sample_batched['depth'], sample_batched['vhm']
 
         # Not sure if this resizing should go here, but it does the trick!
         depth = torch.nn.functional.interpolate(depth, size=(250, 250), mode='bilinear')
+        vhm = torch.nn.functional.interpolate(vhm, size=(250,250), mode='bilinear')
+
+        # We convert the VHM to a binary map, with 0's where the vegetation exceeds the threshold
+        # and 1's in the areas that we actually want to be considered when training
+
+        vhm.apply_(lambda x: 1 if x < vegetation_threshold/50 else 0)
 
         if use_cuda == True:
             depth = depth.cuda(non_blocking=True)
             image = image.cuda()
+            vhm = vhm.cuda(non_blocking=True)
 
         image = torch.autograd.Variable(image)
         depth = torch.autograd.Variable(depth)
+        vhm = torch.autograd.Variable(vhm)
 
         ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float()
 
@@ -351,6 +385,12 @@ def loss_on_test_set(test_loader, model, epoch, use_cuda):
         # The model is evaluated on the current feature sample
 
         output = model(image)
+
+        # We apply the vegetation mask to the input and the output images
+        # Note that torch.mul() performs element-wise multiplication
+
+        depth = torch.mul(depth, vhm)
+        output = torch.mul(output, vhm)
 
         # We calculate the loss function
 
@@ -436,6 +476,7 @@ if __name__ == '__main__':
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
     parser.add_argument('--batch_size', default=1, type=int, help='batch size (default: 1)')
+    parser.add_argument('--vmask', default=5, type=float, help='vegetation mask threshold (default: 5)')
 
     # Arguments concerning input and ouput data location
 

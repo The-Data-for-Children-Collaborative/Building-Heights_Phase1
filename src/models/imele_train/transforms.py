@@ -10,7 +10,7 @@ class ToTensor(object):
         self.is_train = is_train
 
     def __call__(self, sample):
-        image, depth = sample['image'], sample['depth']
+        image, depth, vhm = sample['image'], sample['depth'], sample['vhm']
         """
             Args: pic (PIL.Image or numpy.ndarray): the image to be converted to tensor.
             Returns: Tensor: Converted image.
@@ -22,8 +22,23 @@ class ToTensor(object):
             depth = self.to_tensor(depth)/50
         else:
             depth = self.to_tensor(depth)/100000
+            
+        try:
+            if isinstance(vhm, np.ndarray):
+                vhm = self.to_tensor(vhm)/50
+            else:
+                vhm = self.to_tensor(vhm)/100000
 
-        return {'image': image, 'depth': depth}
+        # If no height map has been specified, we construct a uniformly
+        # negative heightmap, so that the training will happen on the whole image.
+
+        except AttributeError:
+            vhm = -torch.ones_like(depth)
+
+
+        #vhm = -torch.ones_like(depth)
+
+        return {'image': image, 'depth': depth, 'vhm': vhm}
 
     def to_tensor(self, pic):
 
@@ -85,11 +100,11 @@ class Normalize(object):
         Returns:
             Tensor: Normalized image.
         """
-        image, depth = sample['image'], sample['depth']
+        image, depth, vhm = sample['image'], sample['depth'], sample['vhm']
 
         image = self.normalize(image, self.mean, self.std)
 
-        return {'image': image, 'depth': depth}
+        return {'image': image, 'depth': depth, 'vhm': vhm}
 
     def normalize(self, tensor, mean, std):
         """Normalize a tensor image with mean and standard deviation.
