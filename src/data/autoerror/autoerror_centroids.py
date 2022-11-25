@@ -176,8 +176,8 @@ bhm_directory = 'sliced_bhm'
 
 
 # The directories with the prediction files.
-# Make sure that the directories are somehow 'compatible' (e.g. different pairs id, but same number of epochs),
-# as it wouldn't make much sense to calculate an average error over different epochs.
+# saves a histogram file for each directory, but one csv-file with one row for each prediction directory
+# prediction files must start with maxar- in this set up. And ground_truth data must start with bhm-
 
 prediction_directories = ['train_maxar_sliced_prediction_17only_epoch3',
                             'train_maxar_sliced_prediction_17only_epoch20',
