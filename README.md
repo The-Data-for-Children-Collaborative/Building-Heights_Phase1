@@ -13,11 +13,16 @@ The pipeline for data preprocessing (georeferecing, downscaling building height 
 ### Installation
 ------------
 
-Recommended installation procedure is still to come! For now, the packages required to run the CNN model can be obtained via
+The packages required to run the CNN model can be obtained via
 
     pip install -r requirements.txt
     
-For the data processing gdal and for inspecting the building height model rioxarray are required, which can be installed via conda (more detailed process will follow).
+For the data processing gdal and for inspecting the building height model rioxarray are required, which can be installed via conda.  
+All packages needed for data processing and error calculation are listed in requirements_data.txt.  
+
+For obtaining the Sentinel data the package earthengine-api is needed as well as a account for the earth-engine. Please follow the instructions given here <https://developers.google.com/earth-engine/guides/python_install>
+
+For running the superresolution, please follow instructions in the corresponding notebook.
 
 ### General outline
 ------------
