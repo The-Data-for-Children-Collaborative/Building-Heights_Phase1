@@ -474,7 +474,7 @@ if __name__ == '__main__':
     parser.add_argument('--start_epoch', default=0, type=int, help='manual epoch number (useful on restarts)')
     parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float, help='initial learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
-    parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, help='weight decay (default: 1e-4)')
+    parser.add_argument('--weight_decay', default=1e-4, type=float, help='weight decay (default: 1e-4)')
     parser.add_argument('--batch_size', default=1, type=int, help='batch size (default: 1)')
     parser.add_argument('--vmask', default=5, type=float, help='vegetation mask threshold (default: 5)')
 
