@@ -9,5 +9,7 @@ Brief description of each file:
 * `height_model_file_edges.py`: extracts pixel, co-ordinate, and height data (if applicable) from tif files
 * `list_fBHM_files.py`: makes a list of desired BHM files
 * `list_maxar_tifs.py`: makes a list of desired maxar files
+* `rawToInput.py`: alternative approach to go from raw to input data, it results in more misaligned maxar-BHM pairs than  
+regrid_maxar.py 
 
 To run the pipleine (from the Amazon workspace): `python regrid_maxar.py`. Select parts of the pipeline can be run by editing the user input code block in the file.
