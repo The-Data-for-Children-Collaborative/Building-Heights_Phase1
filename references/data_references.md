@@ -38,6 +38,7 @@ subdirectories:
 *height-model*  
 *kaggle_maxar_tiles.zip*  
 *kaggle_maxar_tiles*  
+*grids_extent.csv* - co-ordinate extents of the original Maxar files
 
 - final data: See also report, section "Creating our dataset: aligned Maxar-BHM pairs"   
     - *tim_maxar_bhm_final_pairs*  
@@ -56,21 +57,23 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
 
 - *summary_data*: contains csv files with co-ordinate and pixel details for BHM/VHM/maxar images, and lists of files in the `file_lists` sub-directory 
  
+- *height-model-copy* - copy of the height model files, required for data pipeline
+- *kaggle_maxar_tiles_copy* - copy of the Maxar files, useful for testing
+- *height_model_subset* - subset of height model files, useful for testing       
+- *kaggle_maxar_tiles_subset* - subset of Maxar files, useful for testing
+
 - **????** can these get deleted? if not please add description!     
 data  
-*height-model-copy* - copy of the height model files, required for data pipeline
-*kaggle_maxar_tiles_copy* - copy of the Maxar files, useful for testing
-*height_model_subset* - subset of height model files, useful for testing       
-*kaggle_maxar_tiles_subset* - subset of Maxar files, useful for testing
 ec2_maxar_bhm_final_pairs  
 Valentina  
-*grids_extent.csv* - co-ordinate extents of the original Maxar files
+
                                     
 
 ## **????** What are these? What can be deleted? Or please add description! 
 
-all directories under ~/data:
+all directories under ~/data:  
 
-maxar_slicer_v2.py                          
-
-predict_csv.sh  -> delete?
+maxar_slicer_v2.py 
+maxar_pseudo_mercator_edges.csv  
+height_model_file_pseudo_mercator_edges.csv  
+height_model_file_edges.csv  
