@@ -1,3 +1,5 @@
+r"""Crop VHM files to same extents as BHM / maxar final pairs."""
+
 from osgeo import gdal
 import pandas as pd
 import height_model_file_edges
