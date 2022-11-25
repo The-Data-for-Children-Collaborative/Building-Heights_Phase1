@@ -4,7 +4,7 @@ The aim of this project is to train a convolutional-deconvolutional neural netwo
 
 The building height data covers a region of Sao Paulo and can be downloaded from [this repository](https://www.kaggle.com/datasets/andasampa/height-model).
 
-We will (eventually) use three sources of satellite images: high-resolution maxar data (not publicly available), lower resolution data from [Sentinel 2](https://developers.google.com/earth-engine/datasets/catalog/sentinel-2), and radar images from [Sentiel 1](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD).
+We will (eventually) use three sources of satellite images: high-resolution maxar data (not publicly available), lower resolution data from [Sentinel 2](https://developers.google.com/earth-engine/datasets/catalog/sentinel-2), and radar images from [Sentinel 1](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD).
 
 Currently, this model [here](https://github.com/speed8928/IMELE) is being used, see src/model/imele_predict for a functioning code for predicting height with preset weights.
 
