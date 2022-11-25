@@ -1,7 +1,11 @@
+"""Splits bhm / maxar / vhm triplets randomly into train and test folders."""
+
 import random
 import os
+from os.path import expanduser
 import shutil
 import numpy as np
+import sys
 
 
 def make_split_csvs(folder, pairings_file, train_frac=0.85):
@@ -60,18 +64,18 @@ def add_vhms_to_csvs(folder):
                 f.write(newline)
 
 
-def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
+def make_train_test_dirs(folder, train_csv, test_csv):
     """
     Make train and test sub-directories and copy files into them.
 
     Parameters
     ----------
+    folder: str
+        directory for pairs files
     train_csv : str
         name of the training csv file
     test_csv : str
         name of the test csv file
-    clean_files : bool, optional
-        whether to delete existing files
     """
 
     # make directories if they don't exist
@@ -82,7 +86,7 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
     dir_maxar_train = folder + "train_maxar_sliced/"
     dir_maxar_test = folder + "test_maxar_sliced/"
 
-    for dir in [
+    for dirm in [
         dir_bhm_train,
         dir_bhm_test,
         dir_vhm_train,
@@ -91,13 +95,12 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
         dir_maxar_test,
     ]:
         try:
-            os.mkdir(dir)
+            os.mkdir(dirm)
         except FileExistsError:
-            pass
-
-        # delete existing files
-        if clean_files:
-            os.rmdir(dir)
+            print("deleting")
+            shutil.rmtree(dirm)
+            print("making")
+            os.mkdir(dirm)
 
     # copy files into new dirs
     copy_files(folder, train_csv, dir_maxar_train, dir_bhm_train, dir_vhm_train)
@@ -107,6 +110,21 @@ def make_train_test_dirs(folder, train_csv, test_csv, clean_files=True):
 def copy_files(
     input_dir, input_filename, maxar_output_dir, bhm_output_dir, vhm_output_dir
 ):
+    """Copy maxar, bhm and vhm files into a new training or test directory.
+
+    Parameters
+    ----------
+    input_dir : str
+        input directory containg the triplets csv files
+    input_filename : str
+        name of the triplets.csv file
+    maxar_output_dir : str
+        location for maxar output files
+    bhm_output_dir : str
+        location for bhm output files
+    vhm_output_dir : str:
+        location for vhm output files
+    """
 
     with open(input_dir + input_filename) as f:
         lines = f.readlines()
@@ -118,9 +136,11 @@ def copy_files(
         bhm_array = np.load(input_dir + "sliced_bhm/" + bhm_filename)
         try:
             vhm_array = np.load(input_dir + "sliced_vhm/" + vhm_filename)
+        # might not always be a vhm file if no vegetation
         except FileNotFoundError:
             print("vhm file", vhm_filename, "not found: making array of zeros")
             vhm_array = np.zeros_like(bhm_array)
+        # check dimensions are correct
         if (
             np.shape(maxar_array) == (500, 500, 4)
             and np.shape(bhm_array) == (500, 500)
@@ -135,11 +155,27 @@ def copy_files(
 
 if __name__ == "__main__":
 
-    folder = "/home/tim/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/"
+    # get the home directory
+    homedir = expanduser("~")
+
+    folder = (
+        homedir
+        + "/data/UNICEF_data/tim_maxar_bhm_final_pairs/pairs_"
+        + sys.argv[1]
+        + "/"
+    )
+
+    # whether to overwrite existing train and test splits
     force_overwrite = True
-    clean_files = True
+
+    if force_overwrite:
+        choice = input(
+            "Are you sure you want to overwrite existing train test splits? [y/n]"
+        )
+        if choice == "n":
+            force_overwrite = False
     if not os.path.isfile(folder + "pairings_train.csv") or force_overwrite:
         print("making csvs")
         make_split_csvs(folder, "pairings.csv")
         add_vhms_to_csvs(folder)
-    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
+    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv")
