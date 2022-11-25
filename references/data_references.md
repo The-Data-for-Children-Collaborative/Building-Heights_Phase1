@@ -73,7 +73,7 @@ UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/sliced_maxar_v4
 
 all directories under ~/data:  
 
-maxar_slicer_v2.py 
+maxar_slicer_v2.py    
 maxar_pseudo_mercator_edges.csv  
 height_model_file_pseudo_mercator_edges.csv  
 height_model_file_edges.csv  
