@@ -19,9 +19,9 @@ test_pretrained_model_superres_maxar
 
 ### Trained model weights on OSI_Dataset (doublin) and maxar (brazil). 
 
-Subdirectories correspond to the directories under *UNICEF_data/tim_maxar_bhm_final_pairs* that those models were traied on for *trained_models/brazil*. *trained_models/doublin* correspond to training on *OSI_Dataset*
-*trained_models*   
-*training_logs*  
+Subdirectories correspond to the directories under *UNICEF_data/tim_maxar_bhm_final_pairs* that those models were traied on for *trained_models/brazil*   *trained_models/doublin* correspond to training on *OSI_Dataset* 
+*trained_models*     
+*training_logs*   
 
 ### Original data that the imele model (found under <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/src/models/>)
 
@@ -51,8 +51,6 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
         - all predictions have been performed on validation data sets and done using <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/src/models/imele_predict/eval.py> 
 
 
-    - *tim_maxar_vhm_final_pairs*
-
 - subset of final maxar tif files converted to png to feed into superresolution  
 *tim_maxar_bhm_final_pairs_convert_png*   
 
@@ -62,8 +60,6 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
  *maxar_bhm_final_pairs.zip*              
 
 - **????** can these get deleted? if not please add description!  
-nohup.out  
-tim_test_dummy  
 data  
 height-model-copy  
 height_model_subset        
@@ -80,11 +76,8 @@ grids_extent.csv
 
 all directories under ~/data:
 
-maxar_slicer_v2.py  
-rawToInputMaxar  
+maxar_slicer_v2.py   
 'Differences maxar&height_pseudo_mercator.ods'  
 bhm.tar.gz  
 nohup.out  
 combined.tar.gz                            
-
-predict_csv.sh  -> delete?
