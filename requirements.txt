@@ -9,4 +9,3 @@ torchvision
 opencv-python
 pillow
 scipy
-

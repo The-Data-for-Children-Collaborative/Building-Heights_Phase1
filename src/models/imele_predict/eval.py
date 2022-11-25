@@ -117,7 +117,7 @@ def define_model(is_resnet, is_densenet, is_senet):
     return model
 
 
-def eval_main(csv_filename, model_filename):
+def eval_main(csv_filename, model_filename, use_gpu):
     '''
         The main function.
 
@@ -126,7 +126,13 @@ def eval_main(csv_filename, model_filename):
 
         Parameters: csv_filename, a string with the path of the CSV file
                     model_filename, a string with the location of the pretrained model
+                    use_gpu, a string with either no (Default), when not running on a GPU server or "yes", when running on a GPU server
     '''
+    #if run predictions on GPU server:
+    #only if run on GPU SERVER!!!!
+    print(use_gpu)
+    if use_gpu=="yes":
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
     if(os.path.isfile(csv_filename) == False):
         print('The specified CSV file ({}) does not exist. Quitting.'.format(csv_filename))
@@ -212,9 +218,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--csv', default='')
     parser.add_argument('--model', default='')
+    parser.add_argument('--use_gpu', default="no")
 
     # ...end we actually use it to parse the command line
 
     args = parser.parse_args()
 
-    eval_main(args.csv, args.model)
+    eval_main(args.csv, args.model,args.use_gpu)

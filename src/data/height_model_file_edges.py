@@ -17,7 +17,10 @@ import sys
 ###   end of user information   ###
 
 
-def write_csv(input_file, output_file, bhm=True):
+def write_csv(input_file, output_file, bhm=True, vhm=False):
+
+    if bhm and vhm:
+        sys.exit("File type cannot be both bhm and vhm, aborting")
 
     # read in file list from input file
     with open(input_file, "r") as f:
@@ -49,6 +52,10 @@ def write_csv(input_file, output_file, bhm=True):
         if bhm:
             file_name_list.append(
                 file[file.find(start := "BHM-") + len(start) : file.find(".tif")]
+            )
+        elif vhm:
+            file_name_list.append(
+                file[file.find(start := "VHM-") + len(start) : file.find(".tif")]
             )
         else:
             file_name_list.append(file_abbrv)
