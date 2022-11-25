@@ -11,10 +11,10 @@ with the final/"best" trained model. This model can be found *trained_models/bra
 
 ### Test of aplying super-resolution to maxar to meet Doublin-data (OSI_Dataset) resolution and and make predictions using the weights from the OSI_Dataset.
 - *superresolution_result*  
-Results from super_resolution (used this approach Autumn22_DFCCU/notebooks/superresolution/GFP_GAN.ipynb)    
+Results from super_resolution (used this approach <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/notebooks/superresolution/GFP_GAN.ipynb>)    
 
 - *sliced_super_resolution_valentina*  
-images in *superresolution_result* sliced into 500x500 pixel slices and saved as numpy-arrays using this script ???
+images in *superresolution_result* sliced into 500x500 pixel slices and saved as numpy-arrays using this script **????**
 test_pretrained_model_superres_maxar  
 
 ### Trained model weights on OSI_Dataset (doublin) and maxar (brazil). 
@@ -23,12 +23,12 @@ Subdirectories correspond to the directories under *UNICEF_data/tim_maxar_bhm_fi
 *trained_models*   
 *training_logs*  
 
-### Original data that that the imele model (found under *Autumn22_DFCCU/src/models/*)
+### Original data that the imele model (found under <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/src/models/>)
 
 - *OSI_Dataset* original data  
 - *OSI_test_16112022* predictions on that data  
-- *external* traied weights the model came with ??  
-- *imele_data.zip* corresponding zip file ??
+- *external* traied weights the model came with **????**  
+- *imele_data.zip* corresponding zip file **????**
 
 ### UNICEF_data: contains most of the data 
 subdirectories: 
@@ -41,14 +41,14 @@ subdirectories:
 
 - final data: See also report, section "Creating our dataset: aligned Maxar-BHM pairs"   
     - *tim_maxar_bhm_final_pairs*  
-    ???? *pairs_17* contain the following subdir that are not clear
+    **????** *pairs_17* contain the following subdir that are not clear **????**  
 Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions.
         -  *pairs_17/train_maxar_sliced_prediction_** use models found under *trained_models/brazil/pair_17_17_11* or *trained_models/brazil/pairs_16_17_17_11*  
         errors on centroids for selected predictions can be found under *pairs_17/prediction_error*
         - *pairs_10/train_maxar_sliced_predict* contain predictions done with models under *trained_models/brazil/pairs_10* --> these are the failed training as trained on the higly vegetaed tiles in *pairs_10*
         - */pairs_10/train_maxar_sliced_prediction_pairs** contrain predictions with the corresponding (directory and then epoch) models in *trained_models/brazil*  
         for predictions *pairs_10/train_maxar_sliced_prediction_pairs_10_17_veg_mask_epoch1000* and *pairs_10/train_maxar_sliced_prediction_pairs_10_17_veg_mask_epoch2* the number at the end does not correspond to the epoch but the vegetation threshold applied in the training.  
-        - all predictions have been performed on validation data sets.  
+        - all predictions have been performed on validation data sets and done using <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/src/models/imele_predict/eval.py> 
 
 
     - *tim_maxar_vhm_final_pairs*
@@ -61,7 +61,7 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
  *sentinel_sample_images*  
  *maxar_bhm_final_pairs.zip*              
 
-- can these get deleted? if not please add description!  
+- **????** can these get deleted? if not please add description!  
 nohup.out  
 tim_test_dummy  
 data  
@@ -76,7 +76,8 @@ Valentina
 grids_extent.csv
                                     
 
-## What are these? What can be deleted? Or please add description! 
+## **????** What are these? What can be deleted? Or please add description! 
+
 all directories under ~/data:
 
 maxar_slicer_v2.py  
