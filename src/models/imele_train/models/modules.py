@@ -366,3 +366,36 @@ class R(nn.Module):
 
 
         return x4
+
+
+class PP(nn.Module):
+    def __init__(self, in_channels, out_channels):
+
+        super(PP, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=True, padding='same')
+
+    def forward(self, x):
+
+        xprime = self.conv(x)
+        return xprime
+
+
+class Renormalizer(nn.Module):
+    def __init__(self):
+
+        super(Renormalizer, self).__init__()
+
+    def forward(self, x):
+
+        __imagenet_stats = {'mean': [0.485, 0.456, 0.406],
+                            'std': [0.229, 0.224, 0.225]}
+
+        y = torch.zeros_like(x)
+
+        for batch_id in range(0, x.shape[0]):
+            for channel in range(0, 3):
+                y[batch_id, channel] = (x[batch_id, channel] - torch.mean(x[batch_id, channel])) / torch.std(x[batch_id, channel])
+                y[batch_id, channel] *= __imagenet_stats['std'][channel]
+                y[batch_id, channel] += __imagenet_stats['mean'][channel]
+
+        return y
