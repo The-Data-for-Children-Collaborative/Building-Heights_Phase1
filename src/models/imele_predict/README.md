@@ -9,3 +9,5 @@ Run the predictor with the following command
      python eval.py --csv path/to/list.csv --model ../../../models/imele_predict/Block0_skip_model_110.pth.tar
 
 The CSV file contains a list of comma-separated pairs, input images and predicted output. The input can be any image file supported by Pillow, or a numpy array. The output is written as a numpy array.
+
+For running eval.py on the Amazon EC2 GPU server --use_gpu has to be set to "yes". We are unsure if the needs to be done for other GPU server as well.

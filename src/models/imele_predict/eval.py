@@ -1,18 +1,17 @@
 import torch
 import torch.nn.parallel
 from torch.utils.data import Dataset, DataLoader
-
 import torchvision
 
 import pandas as pd
 import numpy as np
-import cv2
 from PIL import Image
 import os
 import argparse
 
 from models import modules, net, resnet, densenet, senet
 from transforms import ToTensor, Normalize
+
 
 class depthDataset(Dataset):
     '''
@@ -117,7 +116,8 @@ def define_model(is_resnet, is_densenet, is_senet):
 
     return model
 
-def eval_main(csv_filename, model_filename):
+
+def eval_main(csv_filename, model_filename, use_gpu):
     '''
         The main function.
 
@@ -126,7 +126,13 @@ def eval_main(csv_filename, model_filename):
 
         Parameters: csv_filename, a string with the path of the CSV file
                     model_filename, a string with the location of the pretrained model
+                    use_gpu, a string with either no (Default), when not running on a GPU server or "yes", when running on a GPU server
     '''
+    #if run predictions on GPU server:
+    #only if run on GPU SERVER!!!!
+    print(use_gpu)
+    if use_gpu=="yes":
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
     if(os.path.isfile(csv_filename) == False):
         print('The specified CSV file ({}) does not exist. Quitting.'.format(csv_filename))
@@ -166,9 +172,16 @@ def eval_main(csv_filename, model_filename):
     for key, value in state_dict.items():
         new_state_dict['module.' + key] = new_state_dict.pop(key)
 
-    new_state_dict.pop('module.E.Harm.dct')
-    new_state_dict.pop('module.E.Harm.weight')
-    new_state_dict.pop('module.E.Harm.bias')
+    # The following checks are for compatibility with both the pre-trained weights and the new ones
+
+    if 'module.E.Harm.dct' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.dct')
+
+    if 'module.E.Harm.weight' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.weight')
+
+    if 'module.E.Harm.bias' in new_state_dict:
+        new_state_dict.pop('module.E.Harm.bias')
 
     model.load_state_dict(new_state_dict)
 
@@ -193,7 +206,7 @@ def eval_main(csv_filename, model_filename):
         print('Output #{}, shape (after resampling) is {}'.format(i,output.shape))
 
         # The output is saved in numpy format
-        # TODO: this works only on the first element of a batch
+        # FIXME: this works only on the first element of a batch, so we need to work with a batch size of 1
 
         np.save(sample_batched['output_name'][0], output.detach().numpy()[0,0], allow_pickle=False)
 
@@ -205,9 +218,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--csv', default='')
     parser.add_argument('--model', default='')
+    parser.add_argument('--use_gpu', default="no")
 
     # ...end we actually use it to parse the command line
 
     args = parser.parse_args()
 
-    eval_main(args.csv, args.model)
+    eval_main(args.csv, args.model,args.use_gpu)

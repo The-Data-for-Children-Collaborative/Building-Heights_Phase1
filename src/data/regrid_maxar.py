@@ -144,6 +144,68 @@ def resolve_bhm_all(
             subprocess.call(["chmod", "770", filename_out])
 
 
+def reproject_vhm_all(
+    datapath_in, datapath_out, maxar_csv, vhm_csv, overwrite_files=False
+):
+    """Change the resolution of VHM images to match maxar data.
+
+    Parameters
+    ----------
+    datapath_in : str
+        input datapath for the maxar png files
+    datapath_out : str
+        output datapath for the georeferenced files
+    maxar_csv : str
+        maxar csv file (cropped to vhm extents)
+    vhm_csv : str
+        vhm csv file (reprojected to epsg co-ords)
+    """
+    # read in the csv file
+    maxar_df = pd.read_csv(maxar_csv)
+
+    # read the VHM csv file
+    vhm_df = pd.read_csv(vhm_csv)
+
+    # loop over the csv
+    for i in range(len(vhm_df)):
+        print("Changing resolution of VHM files", str(i + 1) + " / " + str(len(vhm_df)))
+        row = vhm_df.loc[[i]]
+        filecode = row.file_name.values[0]
+        search_string = "_".join(filecode[:8].split("-"))
+        subcode = filecode.split("-")[0]
+        row_alt = maxar_df[maxar_df.file_name.str.contains(search_string)]
+        # row_alt = maxar_df.loc[[i]]
+        filename = datapath_in + subcode + "-VHM/VHM-" + filecode + ".tif"
+        try:
+            ulx = row_alt.left.values[0]
+            uly = row_alt.top.values[0]
+            lrx = row_alt.right.values[0]
+            lry = row_alt.bottom.values[0]
+            if (
+                ulx < row.left.values[0]
+                or uly > row_alt.top.values[0]
+                or lrx > row.right.values[0]
+                or lry < row.bottom.values[0]
+            ):
+                print("Potential problem in file ", filecode)
+        except IndexError:
+            continue
+        coords = [ulx, uly, lrx, lry]
+        filename_out = (
+            datapath_out + filecode[:4] + "-VHM/VHM-" + filecode + "_resolve.tif"
+        )
+        if isfile(filename_out) and not overwrite_files:
+            continue
+        if lrx - ulx <= 0:
+            print("Skipping, negative x window")
+        elif uly - lry <= 0:
+            print("Skipping, negative y window")
+        else:
+            pixels = [row_alt.pixel_horiz.values[0], row_alt.pixel_vert.values[0]]
+            gdal_resolve_bhm(filename, filename_out, coords, pixels)
+            subprocess.call(["chmod", "770", filename_out])
+
+
 def gdal_reproject_bhm(input_filename, output_filename):
     """Change BHM file to EPSG:3857 reference.
 
@@ -331,6 +393,7 @@ if __name__ == "__main__":
         BHM_csv = "BHM_subset_pm_res.csv"
     else:
         BHM_filename = "BHM_subset_reproj_res_list.txt"
+        BHM_csv = "BHM_pm_res.csv"
 
     list_files.list_BHM_files(
         BHM_init_path, listfiles_path, BHM_filename, search_string="_reproject_resolve"
