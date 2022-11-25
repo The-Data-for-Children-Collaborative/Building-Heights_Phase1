@@ -41,8 +41,7 @@ subdirectories:
 *grids_extent.csv* - co-ordinate extents of the original Maxar files
 
 - final data: See also report, section "Creating our dataset: aligned Maxar-BHM pairs"   
-    - *tim_maxar_bhm_final_pairs*  
-    **????** *pairs_17* contain the following subdir that are not clear **????**  
+    - *tim_maxar_bhm_final_pairs*   
 Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions.
         -  *pairs_17/train_maxar_sliced_prediction_** use models found under *trained_models/brazil/pair_17_17_11* or *trained_models/brazil/pairs_16_17_17_11*  
         errors on centroids for selected predictions can be found under *pairs_17/prediction_error*
@@ -63,9 +62,10 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
 - *kaggle_maxar_tiles_subset* - subset of Maxar files, useful for testing
 
 - **????** can these get deleted? if not please add description!     
-data  
-ec2_maxar_bhm_final_pairs  
+data     
 Valentina  
+UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/test.py  
+UNICEF_data/tim_maxar_bhm_final_pairs/pairs_17/sliced_maxar_v4   
 
                                     
 
