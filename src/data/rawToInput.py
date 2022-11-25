@@ -5,9 +5,7 @@ From raw to input data: make pairs of maxar png files and BHM tifs
 """
 BEFORE running the script: 
 
-1) Rename ALL maxar png photos from ????_???.png to ????-???.png converting the underscore to a minus symbol
-for f in *.png; do mv "$f" "${f//_/´}"; done
-
+1) The name of the maxar images must be the same as the qmdt_cod in the csv file
 
 2) Create the output folders:
 maxar_georef
@@ -18,7 +16,7 @@ cropped_maxar
 
 3) Change the paths for input and output data to match your local paths
 
-4) Work with a copy of your original data. The filtering in step 2 permanently deletes the BHM reprojected files that are smaller than 100x100.
+4) Work with a copy of your original data. The filtering in step 2 permanently deletes the BHM reprojected files that are smaller than 100x100. This action is not taken in the raw data, it affects only the output of reprojection.
 
 """
 
@@ -38,6 +36,7 @@ xyz_data = "/Users/konstantinamitsi/Documents/S2DS/DFCCU/maxarBHMpairs/xyz_test/
 shp_2d = "/Users/konstantinamitsi/Documents/S2DS/DFCCU/maxarBHMpairs/shp_2d/"
 cropped_maxar = "/Users/konstantinamitsi/Documents/S2DS/DFCCU/maxarBHMpairs/cropped_maxar/"
 
+
 # Import packages
 
 from osgeo import gdal
@@ -47,8 +46,6 @@ from shapely.geometry import Point
 import fiona
 import rasterio
 import rasterio.mask
-import os
-import glob
 from os.path import exists as file_exists
 
 

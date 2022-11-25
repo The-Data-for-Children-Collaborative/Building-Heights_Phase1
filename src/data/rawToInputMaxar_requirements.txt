@@ -1,7 +1,0 @@
-pandas
-geopandas
-shapely
-Fiona
-rasterio
-os-sys
-glob2
