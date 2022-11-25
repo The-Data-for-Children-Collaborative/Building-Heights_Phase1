@@ -207,8 +207,8 @@ if __name__ == "__main__":
     if not os.path.isfile(folder + "pairings_train.csv") or force_overwrite:
         print("making csvs")
         make_split_csvs(folder, "pairings.csv")
-    add_vhms_to_csvs(folder)
-    # make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
-    make_vhm_train_test_dirs(
-        folder, "triplets_train.csv", "triplets_test.csv", clean_files
-    )
+    # add_vhms_to_csvs(folder)
+    make_train_test_dirs(folder, "triplets_train.csv", "triplets_test.csv", clean_files)
+    # make_vhm_train_test_dirs(
+    #     folder, "triplets_train.csv", "triplets_test.csv", clean_files
+    # )
