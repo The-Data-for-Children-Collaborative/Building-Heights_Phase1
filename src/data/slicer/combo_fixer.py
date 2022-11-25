@@ -1,5 +1,6 @@
 ### Fixes the bug caused by slicer_v3: Crops the bottom left block from a maxar image and saves it in the directory where all other sliced images are
 # the user needs to insert the path to the maxar folder and the path of the sliced directory
+# requires the sliced files to be 
 
 import numpy as np
 from PIL import Image
