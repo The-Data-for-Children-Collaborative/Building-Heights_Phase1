@@ -1,6 +1,6 @@
 # DFCCU: Predicting building height from satellite images
 
-The aim of this project is to train a convolutional-deconvolutional neural network (such as the one described [here](https://arxiv.org/abs/1802.10249) or [here](https://www.mdpi.com/2072-4292/12/17/2719)) to predict building height data from satellite images. 
+The aim of this project is to use a convolutional-deconvolutional neural network (such as the one described [here](https://arxiv.org/abs/1802.10249) or [here](https://www.mdpi.com/2072-4292/12/17/2719)) to predict building height data from satellite images. 
 
 The building height data covers a region of Sao Paulo and can be downloaded from [this repository](https://www.kaggle.com/datasets/andasampa/height-model).
 
