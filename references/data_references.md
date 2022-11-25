@@ -17,11 +17,11 @@ Results from super_resolution (used this approach <https://github.com/S2DSLondon
 images in *superresolution_result* sliced into 500x500 pixel slices and saved as numpy-arrays using this script **????**
 test_pretrained_model_superres_maxar  
 
-### Trained model weights on OSI_Dataset (doublin) and maxar (brazil). 
+### Trained model weights on OSI_Dataset (Dublin) and maxar (Brazil). 
 
-Subdirectories correspond to the directories under *UNICEF_data/tim_maxar_bhm_final_pairs* that those models were traied on for *trained_models/brazil*   *trained_models/doublin* correspond to training on *OSI_Dataset* 
-*trained_models*     
-*training_logs*   
+Subdirectories correspond to the directories under *UNICEF_data/tim_maxar_bhm_final_pairs* that those models were traied on for *trained_models/brazil*. *trained_models/doublin* correspond to training on *OSI_Dataset*
+*trained_models*   
+*training_logs*  
 
 ### Original data that the imele model (found under <https://github.com/S2DSLondon/Autumn22_DFCCU/tree/main/src/models/>)
 
@@ -54,30 +54,23 @@ Subdirectories *pairs_10* and *pairs_17* contain subdirectories with predictions
 - subset of final maxar tif files converted to png to feed into superresolution  
 *tim_maxar_bhm_final_pairs_convert_png*   
 
-- This seems important? Please add dscription!  
- *summary_data*  
- *sentinel_sample_images*  
- *maxar_bhm_final_pairs.zip*              
-
-- **????** can these get deleted? if not please add description!  
+- *summary_data*: contains csv files with co-ordinate and pixel details for BHM/VHM/maxar images, and lists of files in the `file_lists` sub-directory 
+ 
+- **????** can these get deleted? if not please add description!     
 data  
-height-model-copy  
-height_model_subset        
-kaggle_maxar_tiles_subset  
-kaggle_maxar_tiles_copy  
-height-model-copy  
+*height-model-copy* - copy of the height model files, required for data pipeline
+*kaggle_maxar_tiles_copy* - copy of the Maxar files, useful for testing
+*height_model_subset* - subset of height model files, useful for testing       
+*kaggle_maxar_tiles_subset* - subset of Maxar files, useful for testing
 ec2_maxar_bhm_final_pairs  
-maxar_bhm_pairs.zip  
 Valentina  
-grids_extent.csv
+*grids_extent.csv* - co-ordinate extents of the original Maxar files
                                     
 
 ## **????** What are these? What can be deleted? Or please add description! 
 
 all directories under ~/data:
 
-maxar_slicer_v2.py   
-'Differences maxar&height_pseudo_mercator.ods'  
-bhm.tar.gz  
-nohup.out  
-combined.tar.gz                            
+maxar_slicer_v2.py                          
+
+predict_csv.sh  -> delete?
