@@ -1,0 +1,9 @@
+name: sentinel
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - earthengine-api
+  - numpy
+  - pandas
+  - pyproj
