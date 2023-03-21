@@ -24,6 +24,17 @@ For obtaining the Sentinel data the package earthengine-api is needed as well as
 
 For running the superresolution, please follow instructions in the corresponding notebook.
 
+### Sentinel specific instructions
+------------
+
+1. Set up a conda environment using the `envs/sentinel.yml` file as follows:
+`conda env create -f sentinel.yml`
+2. Activate the environment with `conda activate sentinel`
+3. Register for a google earth engine account [here](https://signup.earthengine.google.com/#!/)
+4. Install `gcloud` following the instructions [here](https://cloud.google.com/sdk/docs/install)
+5. Authenticate earth engine with the command `earthengine authenticate`. NOTE: If using a cluster / remote machine, this should be done with the `--quiet` flag, i.e. `earthengine authenticate --quiet`.
+6. Check it's working by running a Python interpreter with the commands `import ee` and then `ee.Initialize()`. If no errors are thrown then set-up is complete.
+
 ### General outline
 ------------
 This project is based on the [Cookiecutter template](http://drivendata.github.io/cookiecutter-data-science/) for data science projects and is structured as follows:
